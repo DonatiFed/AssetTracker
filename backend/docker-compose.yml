@@ -1,0 +1,37 @@
+
+
+services:
+  db:
+    image: postgres:latest
+    container_name: asset_tracker_db
+    restart: always
+    environment:
+      POSTGRES_DB: asset_tracker
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: asset_tracker_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: asset_tracker
+      DATABASE_USER: admin
+      DATABASE_PASSWORD: adminpassword
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  postgres_data:
