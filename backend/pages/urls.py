@@ -1,11 +1,13 @@
-from django.urls import path,include
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import homePageView,OwnerViewSet, AssetViewSet, OwnershipViewSet  # Import views from the same folder
+from .views import OwnerViewSet, AssetViewSet, OwnershipViewSet  # ✅ Importa i ViewSet
 
+# ✅ Creiamo il router
 router = DefaultRouter()
 router.register(r'owners', OwnerViewSet)
 router.register(r'assets', AssetViewSet)
 router.register(r'ownerships', OwnershipViewSet)
+
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),  # ✅ Adesso il router è incluso
 ]

@@ -12,9 +12,12 @@ class AssetSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class OwnershipSerializer(serializers.ModelSerializer):
-    asset_name = serializers.ReadOnlyField(source='asset.name')
-    owner_name = serializers.ReadOnlyField(source='owner.first_name')
+    owner_name = serializers.CharField(source='owner.first_name', read_only=True)
+    asset_name = serializers.CharField(source='asset.name', read_only=True)
+    asset = serializers.PrimaryKeyRelatedField(queryset=Asset.objects.all())
+    owner = serializers.PrimaryKeyRelatedField(queryset=Owner.objects.all())
 
     class Meta:
         model = Ownership
-        fields = '__all__'
+        fields = ['id', 'owner_name', 'asset_name', 'asset', 'owner', 'date_acquired', 'quantity']
+
