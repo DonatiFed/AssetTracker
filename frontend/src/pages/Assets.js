@@ -66,7 +66,7 @@ function Assets() {
                         <th>ID</th>
                         <th>Nome</th>
                         <th>Descrizione</th>
-                        <th>Categoria</th>
+                        <th>Disponibili</th>
                         <th>Azioni</th>
                     </tr>
                     </thead>
@@ -76,7 +76,7 @@ function Assets() {
                             <td>{asset.id}</td>
                             <td>{asset.name}</td>
                             <td>{asset.description}</td>
-                            <td>{asset.category}</td>
+                            <td>{asset.available_quantity}</td>
                             <td className="actions-column">
                                 <div className="dropdown" ref={(el) => (menuRefs.current[asset.id] = el)}>
                                     <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(asset.id)} />
@@ -101,7 +101,7 @@ function Assets() {
                 fields={[
                     { name: "name", label: "Nome" },
                     { name: "description", label: "Descrizione" },
-                    { name: "category", label: "Categoria" },
+                    { name: "available_quantity", label: "Disponibili", type: "number" },
                 ]}
             />
         </>
@@ -109,5 +109,6 @@ function Assets() {
 }
 
 export default Assets;
+
 
 
