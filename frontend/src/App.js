@@ -6,10 +6,15 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Assets from "./pages/Assets";
 import Locations from "./pages/Locations";
-import Owners from "./pages/Owners";
-import Ownerships from "./pages/Ownerships";
 import Reports from "./pages/Reports";
 import AcquiredAssets from "./pages/AcquiredAssets";
+import Acquisitions from "./pages/Acquisitions";
+import History from "./pages/History";
+import Users from "./pages/Users";
+import Profile from "./pages/Profile";
+import Assignments from "./pages/Assignments";
+
+
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(
@@ -30,10 +35,13 @@ function App() {
                 <Route path="/home" element={isLoggedIn ? <Home /> : <Navigate to="/" />} />
                 <Route path="/assets" element={isLoggedIn ? <Assets /> : <Navigate to="/" />} />
                 <Route path="/acquired-assets" element={isLoggedIn ? <AcquiredAssets /> : <Navigate to="/" />} />
+                <Route path="/acquisitions" element={isLoggedIn ? <Acquisitions /> : <Navigate to="/" />} />
+                <Route path="/assignments" element={isLoggedIn ? <Assignments /> : <Navigate to="/" />} />
                 <Route path="/locations" element={isLoggedIn ? <Locations /> : <Navigate to="/" />} />
-                <Route path="/owners" element={isLoggedIn ? <Owners /> : <Navigate to="/" />} />
-                <Route path="/ownerships" element={isLoggedIn ? <Ownerships /> : <Navigate to="/" />} />
                 <Route path="/reports" element={isLoggedIn ? <Reports /> : <Navigate to="/" />} />
+                <Route path="/history" element={isLoggedIn ? <History /> : <Navigate to="/" />} />
+                <Route path="/users" element={isLoggedIn ? <Users /> : <Navigate to="/" />} />
+                <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/" />} />
             </Routes>
         </Router>
     );

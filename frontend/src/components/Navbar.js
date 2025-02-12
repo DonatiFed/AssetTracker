@@ -40,6 +40,7 @@ function Navbar() {
                     <>
                         <li><Link to="/users">👥 Users</Link></li>
                         <li><Link to="/assets">📦 Assets</Link></li>
+                        <li><Link to="/assignments">📜 Assignments</Link></li>
                         <li><Link to="/acquisitions">📑 Acquisitions</Link></li>
                         <li><Link to="/reports">📊 Reports</Link></li>
                         <li><Link to="/history">📜 History</Link></li>
