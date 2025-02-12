@@ -1,7 +1,9 @@
 from rest_framework import viewsets, permissions,status,generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated,AllowAny
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes,action
+from django.db.models import Sum
+
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 from .models import Asset, Location, Assignment, Acquisition, Report,CustomUser
@@ -65,16 +67,18 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsManager]  # Solo i manager possono vedere e modificare utenti
 
 
-# ✅ Viewset per gli asset
 class AssetViewSet(viewsets.ModelViewSet):
     queryset = Asset.objects.all()
     serializer_class = AssetSerializer
+    permission_classes = [IsAuthenticated]
 
-    def get_permissions(self):
-        """Manager può gestire tutto, user può solo vedere gli asset assegnati."""
-        if self.request.user.is_manager():
-            return [permissions.IsAuthenticated()]
-        return [permissions.IsAuthenticated(), IsOwnerOrManager()]
+    @action(detail=False, methods=['get'], url_path='user')
+    def user_assets(self, request):
+        """ Restituisce solo gli asset assegnati all'utente autenticato. """
+        user_assignments = Assignment.objects.filter(user=request.user)
+        user_assets = Asset.objects.filter(assignments__in=user_assignments).distinct()
+        serializer = self.get_serializer(user_assets, many=True)
+        return Response(serializer.data)
 
 
 class LocationViewSet(viewsets.ModelViewSet):
@@ -91,12 +95,49 @@ class LocationViewSet(viewsets.ModelViewSet):
 class AssignmentViewSet(viewsets.ModelViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get_permissions(self):
-        """Solo il manager può assegnare gli asset, gli user non modificano nulla."""
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [IsManager()]
-        return [permissions.IsAuthenticated()]
+    def create(self, request, *args, **kwargs):
+        user_id = request.data.get("user")
+        asset_id = request.data.get("asset")
+        assigned_quantity = int(request.data.get("assigned_quantity", 0))
+
+        # Verifica se l'utente e l'asset esistono
+        try:
+            user = CustomUser.objects.get(id=user_id)
+            asset = Asset.objects.get(id=asset_id)
+        except (CustomUser.DoesNotExist, Asset.DoesNotExist):
+            return Response({"error": "Utente o asset non valido"}, status=400)
+
+        # Controlla se esiste già un'assegnazione per questo asset a questo user
+        existing_assignment = Assignment.objects.filter(user=user, asset=asset).exists()
+        if existing_assignment:
+            return Response({"error": "Questo asset è già stato assegnato all'utente"}, status=400)
+
+        # Controlla che la quantità assegnata non superi il totale dell'asset
+        if assigned_quantity > asset.total_quantity:
+            return Response({"error": "Quantità assegnata superiore al totale disponibile"}, status=400)
+
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        new_quantity = int(request.data.get("assigned_quantity", instance.assigned_quantity))
+
+        # Verifica che la nuova quantità assegnata non superi il totale degli asset
+        if new_quantity > instance.asset.total_quantity:
+            return Response({"error": "Quantità assegnata superiore al totale disponibile"}, status=400)
+
+        instance.assigned_quantity = new_quantity
+        instance.save()
+        return Response(AssignmentSerializer(instance).data)
+
+    @action(detail=True, methods=["DELETE"])
+    def remove(self, request, pk=None):
+        assignment = self.get_object()
+        assignment.delete()
+        return Response({"message": "Assegnazione rimossa con successo"}, status=204)
+
 
 
 # ✅ Viewset per le acquisizioni di asset

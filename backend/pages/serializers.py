@@ -52,15 +52,14 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
         fields = ['id', 'name', 'address', 'description']
 
-# Serializer per le assegnazioni degli asset agli utenti
+
 class AssignmentSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()  # Mostra il nome utente invece dell'ID
-    manager = serializers.StringRelatedField()
-    asset = serializers.StringRelatedField()
+    user_name = serializers.ReadOnlyField(source="user.username")
+    asset_name = serializers.ReadOnlyField(source="asset.name")
 
     class Meta:
         model = Assignment
-        fields = ['id', 'user', 'manager', 'asset', 'assigned_quantity', 'assigned_at']
+        fields = ["id", "user", "user_name", "asset", "asset_name", "assigned_quantity", "assigned_at"]
 
 # Serializer per le acquisizioni di asset dagli utenti
 class AcquisitionSerializer(serializers.ModelSerializer):

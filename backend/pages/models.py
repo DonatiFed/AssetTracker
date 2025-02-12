@@ -45,13 +45,20 @@ class Location(models.Model):
 
 class Assignment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="assignments")
-    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="assigned_by")
+    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="assigned_by")  #TODO: rimuovere manager nell'assignment
     asset = models.ForeignKey("Asset", on_delete=models.CASCADE, related_name="assignments")
-    assigned_quantity = models.PositiveIntegerField(default=1)
+    assigned_quantity = models.PositiveIntegerField(default=1)  # Quantità assegnata
     assigned_at = models.DateTimeField(default=now)
 
+    def save(self, *args, **kwargs):
+        """ Impedisce di assegnare più asset di quelli disponibili """
+        if self.assigned_quantity > self.asset.total_quantity:
+            raise ValueError("La quantità assegnata supera la disponibilità dell'asset.")
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.assigned_quantity} x {self.asset.name} → {self.user.first_name} {self.user.last_name} (Assegnato da {self.manager.first_name if self.manager else 'N/A'})"
+        return f"{self.assigned_quantity} x {self.asset.name} → {self.user.first_name} {self.user.last_name}"
+
 
 
 class Acquisition(models.Model):

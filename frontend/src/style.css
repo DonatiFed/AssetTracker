@@ -240,7 +240,7 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Sfondo scuro trasparente */
+/* MODAL OVERLAY */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -254,10 +254,10 @@ body {
     z-index: 1000;
 }
 
-/* Contenitore del Modale */
+/* MODAL CONTAINER */
 .modal-container {
-    background: #660000;
-    color: white;
+    background: white;
+    color: black;
     padding: 20px;
     border-radius: 8px;
     width: 350px;
@@ -266,51 +266,46 @@ body {
     animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Campi di input */
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
+/* TITOLI DEL MODALE */
+.modal-container h2 {
+    color: #8B0000;
+    margin-bottom: 10px;
 }
 
-.form-group label {
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-.form-group input {
+/* INPUT DEL MODALE */
+.modal-container input {
+    width: 100%;
     padding: 10px;
-    border: 1px solid white;
-    border-radius: 5px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     font-size: 14px;
-    background: rgba(255, 255, 255, 0.9);
-    color: black;
 }
 
-/* Bottoni del Modale */
+/* BOTTONI DEL MODALE */
 .modal-buttons {
     display: flex;
     justify-content: space-between;
     margin-top: 15px;
 }
 
-.cancel-btn {
-    background: #444;
+.cancel-btn, .save-btn {
     padding: 10px 15px;
     border: none;
-    color: white;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.save-btn {
-    background: #ff3333;
-    padding: 10px 15px;
-    border: none;
-    color: white;
     cursor: pointer;
     border-radius: 5px;
     font-weight: bold;
+    transition: background 0.3s;
+}
+
+.cancel-btn {
+    background: #444;
+    color: white;
+}
+
+.save-btn {
+    background: #8B0000;
+    color: white;
 }
 
 .cancel-btn:hover {
@@ -318,10 +313,10 @@ body {
 }
 
 .save-btn:hover {
-    background: #cc0000;
+    background: #4B0000;
 }
 
-/* Animazione */
+/* ANIMAZIONE MODALE */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -332,6 +327,7 @@ body {
         transform: translateY(0);
     }
 }
+
 
 /* 🔹 USER INFO: Sempre accanto alla navbar, senza sovrapporsi */
 .user-info-container {
@@ -368,7 +364,79 @@ body {
     color: #ffcccc;
 }
 
+/* 📌 Profilo Utente */
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 100px);
+    padding-top: 40px;
+    color: white;
+    animation: fadeIn 1.5s ease-in-out;
+}
 
+.profile-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 12px;
+    width: 400px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+
+.profile-info p {
+    font-size: 18px;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.profile-info input {
+    padding: 8px;
+    border: 1px solid white;
+    border-radius: 5px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+    width: 80%;
+}
+
+.profile-actions {
+    margin-top: 15px;
+}
+
+.edit-button, .save-button, .cancel-button {
+    background: #8B0000;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background 0.3s;
+}
+
+.save-button {
+    background: #28a745;
+}
+
+.cancel-button {
+    background: #dc3545;
+}
+
+.edit-button:hover, .save-button:hover, .cancel-button:hover {
+    opacity: 0.8;
+}
+
+/* 🏆 Animazioni */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 
 
