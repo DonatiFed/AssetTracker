@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     CustomUserViewSet, AssetViewSet, AssignmentViewSet, AcquisitionViewSet,
-    ReportViewSet, LocationViewSet
+    ReportViewSet, LocationViewSet, get_current_user, RegisterView
 )
 
 router = DefaultRouter()
@@ -17,4 +17,6 @@ router.register(r'locations', LocationViewSet)  # Manager può aggiungere/modifi
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('users/me/', get_current_user, name='get_current_user'),  # ✅ API per ottenere l'utente attual
+    path("api/register/", RegisterView.as_view(), name="register"),
 ]

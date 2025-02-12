@@ -1,18 +1,16 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions,status,generics
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 from .models import Asset, Location, Assignment, Acquisition, Report,CustomUser
 from .serializers import (
     AssetSerializer, LocationSerializer, AssignmentSerializer,
-    AcquisitionSerializer, ReportSerializer, UserSerializer,CustomUserSerializer
+    AcquisitionSerializer, ReportSerializer, UserSerializer,CustomUserSerializer,RegisterSerializer
 )
 from django.contrib.auth import get_user_model
 from .permissions import IsManager, IsOwnerOrManager
-
-
-
-
 
 
 
@@ -35,6 +33,30 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_current_user(request):
+    user = request.user
+    serializer = CustomUserSerializer(user)
+    return Response(serializer.data)
+
+
+
+User = get_user_model()
+
+class RegisterView(generics.CreateAPIView):
+    """API per la registrazione di un nuovo utente"""
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]  # ⬅ Rimuove il requisito di autenticazione
+
+    def create(self, request, *args, **kwargs):
+        """Gestisce la registrazione e restituisce un messaggio di successo"""
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ✅ Viewset per la gestione utenti
 class UserViewSet(viewsets.ModelViewSet):

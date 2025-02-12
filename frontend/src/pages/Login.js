@@ -1,28 +1,47 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../style.css";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import '../style.css';
 
-function Login({ onLogin }) {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+function Login() {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        if (username && password) {
-            onLogin();
-            navigate("/home");
-        } else {
-            alert("Inserisci username e password");
+        try {
+            const response = await axios.post('http://localhost:8001/api/token/', {
+                username,
+                password
+            });
+
+            // Salva i token nel localStorage
+            localStorage.setItem('access_token', response.data.access);
+            localStorage.setItem('refresh_token', response.data.refresh);
+
+            // Recupera i dati dell'utente
+            const userResponse = await axios.get('http://localhost:8001/users/me/', {
+                headers: { Authorization: `Bearer ${response.data.access}` }
+            });
+
+            // Salva il ruolo
+            localStorage.setItem('user_role', userResponse.data.role); // "manager" o "user"
+
+            // Reindirizza alla home dopo il login
+            navigate('/home');
+        } catch (err) {
+            setError('Credenziali non valide');
         }
     };
 
     return (
         <div className="login-container">
             <div className="login-box">
-                <h2>Benvenuto</h2>
-                <p>Accedi al tuo account per continuare</p>
-                <form onSubmit={handleSubmit}>
+                <h2>Login</h2>
+                {error && <p className="error">{error}</p>}
+                <form onSubmit={handleLogin}>
                     <input
                         type="text"
                         placeholder="Username"
@@ -45,5 +64,6 @@ function Login({ onLogin }) {
 }
 
 export default Login;
+
 
 
