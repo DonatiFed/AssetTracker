@@ -333,5 +333,42 @@ body {
     }
 }
 
+/* 🔹 USER INFO: Sempre accanto alla navbar, senza sovrapporsi */
+.user-info-container {
+    position: absolute;
+    top: 90px; /* Abbassato per allinearsi alla navbar */
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px 20px;
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease-in-out;
+    z-index: 1001; /* Si assicura che sia sopra la navbar */
+}
+
+.user-info-container:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.user-info-container p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.user-info-container .user-icon {
+    font-size: 20px;
+    margin-right: 8px;
+    color: #ffcccc;
+}
+
+
+
 
 

@@ -9,6 +9,7 @@ import Locations from "./pages/Locations";
 import Owners from "./pages/Owners";
 import Ownerships from "./pages/Ownerships";
 import Reports from "./pages/Reports";
+import AcquiredAssets from "./pages/AcquiredAssets";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/home" element={isLoggedIn ? <Home /> : <Navigate to="/" />} />
                 <Route path="/assets" element={isLoggedIn ? <Assets /> : <Navigate to="/" />} />
+                <Route path="/acquired-assets" element={isLoggedIn ? <AcquiredAssets /> : <Navigate to="/" />} />
                 <Route path="/locations" element={isLoggedIn ? <Locations /> : <Navigate to="/" />} />
                 <Route path="/owners" element={isLoggedIn ? <Owners /> : <Navigate to="/" />} />
                 <Route path="/ownerships" element={isLoggedIn ? <Ownerships /> : <Navigate to="/" />} />

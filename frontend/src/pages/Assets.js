@@ -1,22 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
+import UserInfo from "../components/UserInfo"; // Mostra il ruolo dell'utente
 import "../style.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { fetchAssets } from "../server/api";
-import AddItemModal from "../components/AddItemModal";
+
+// Mock data temporanei
+const mockAssets = [
+    { id: 1, name: "Laptop", description: "MacBook Pro 16''", available_quantity: 5 ,created_at: "2024-01-01",updated_at: "2024-01-01"},
+    { id: 2, name: "Monitor", description: "Dell 27'' 144Hz", available_quantity: 8 ,created_at: "2024-01-01",updated_at: "2024-01-01"},
+    { id: 3, name: "Mouse", description: "Logitech MX Master", available_quantity: 12 ,created_at: "2024-01-01",updated_at: "2024-01-01"},
+];
 
 function Assets() {
-    const [assets, setAssets] = useState([]);
+    const [assets, setAssets] = useState(mockAssets);
     const [menuOpen, setMenuOpen] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [role, setRole] = useState(null);
     const menuRefs = useRef({});
 
     useEffect(() => {
-        const loadAssets = async () => {
-            const data = await fetchAssets();
-            setAssets(data);
+        // Simula un recupero del ruolo utente (Sostituire con API in futuro)
+        const fetchUserRole = async () => {
+            const storedRole = localStorage.getItem("user_role");
+            setRole(storedRole);
         };
-        loadAssets();
+        fetchUserRole();
     }, []);
 
     const toggleMenu = (id) => {
@@ -28,38 +36,23 @@ function Assets() {
         setMenuOpen(null);
     };
 
-    const handleSave = async (newAsset) => {
-        try {
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/assets/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(newAsset),
-            });
-
-            if (!response.ok) {
-                throw new Error("Errore nell'aggiunta dell'asset");
-            }
-
-            const savedAsset = await response.json();
-            setAssets([...assets, savedAsset]);
-            setShowModal(false);
-        } catch (error) {
-            console.error("Errore nel salvataggio:", error);
-        }
-    };
-
     return (
         <>
             <Navbar />
+
+            <div className="content-container">
+                <UserInfo /> {/* Mostra il ruolo dell'utente */}
+
             <div className="table-container">
                 <div className="table-header">
                     <h1>Gestione Asset</h1>
-                    <button className="add-button" onClick={() => setShowModal(true)}>
-                        ➕ Aggiungi Asset
-                    </button>
+                    {role === "manager" && (
+                        <button className="add-button" onClick={() => setShowModal(true)}>
+                            ➕ Aggiungi Asset
+                        </button>
+                    )}
                 </div>
+
                 <table className="styled-table">
                     <thead>
                     <tr>
@@ -67,7 +60,9 @@ function Assets() {
                         <th>Nome</th>
                         <th>Descrizione</th>
                         <th>Disponibili</th>
-                        <th>Azioni</th>
+                        {role === "manager" && <th>Azioni</th>} {/* Azioni solo per il manager */}
+                        {role === "manager" && <th>Data Creazione</th>} {/* Azioni solo per il manager */}
+                        {role === "manager" && <th>Ultima Modifica</th>} {/* Azioni solo per il manager */}
                     </tr>
                     </thead>
                     <tbody>
@@ -77,38 +72,33 @@ function Assets() {
                             <td>{asset.name}</td>
                             <td>{asset.description}</td>
                             <td>{asset.available_quantity}</td>
-                            <td className="actions-column">
-                                <div className="dropdown" ref={(el) => (menuRefs.current[asset.id] = el)}>
-                                    <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(asset.id)} />
-                                    {menuOpen === asset.id && (
-                                        <div className="dropdown-menu show">
-                                            <p onClick={() => handleAction("Modifica", asset.id)}>✏️ Modifica</p>
-                                            <p onClick={() => handleAction("Rimuovi", asset.id)}>🗑️ Rimuovi</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </td>
+                            {role === "manager" && <td>asset.created_at</td>} {/* Azioni solo per il manager */}
+                            {role === "manager" && <td>asset.updated_at</td>}
+                            {role === "manager" && (
+                                <td className="actions-column">
+                                    <div className="dropdown" ref={(el) => (menuRefs.current[asset.id] = el)}>
+                                        <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(asset.id)} />
+                                        {menuOpen === asset.id && (
+                                            <div className="dropdown-menu show">
+                                                <p onClick={() => handleAction("Modifica", asset.id)}>✏️ Modifica</p>
+                                                <p onClick={() => handleAction("Rimuovi", asset.id)}>🗑️ Rimuovi</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </td>
+                            )}
                         </tr>
                     ))}
                     </tbody>
                 </table>
             </div>
-
-            <AddItemModal
-                show={showModal}
-                handleClose={() => setShowModal(false)}
-                handleSave={handleSave}
-                fields={[
-                    { name: "name", label: "Nome" },
-                    { name: "description", label: "Descrizione" },
-                    { name: "available_quantity", label: "Disponibili", type: "number" },
-                ]}
-            />
+            </div>
         </>
     );
 }
 
 export default Assets;
+
 
 
 
