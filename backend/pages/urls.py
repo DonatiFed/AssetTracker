@@ -1,15 +1,20 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import OwnerViewSet, AssetViewSet, OwnershipViewSet,LocationViewSet,ReportViewSet
+from .views import (
+    CustomUserViewSet, AssetViewSet, AssignmentViewSet, AcquisitionViewSet,
+    ReportViewSet, LocationViewSet
+)
 
-# ✅ Creiamo il router
 router = DefaultRouter()
-router.register(r'owners', OwnerViewSet)
-router.register(r'assets', AssetViewSet)
-router.register(r'ownerships', OwnershipViewSet)
-router.register(r'locations', LocationViewSet)
-router.register(r'reports', ReportViewSet)
+
+# Le API accessibili ai manager
+router.register(r'users', CustomUserViewSet)  # Solo per i manager
+router.register(r'assets', AssetViewSet)  # Manager può modificare
+router.register(r'assignments', AssignmentViewSet)  # Manager assegna asset
+router.register(r'acquisitions', AcquisitionViewSet)  # User può acquisire/rilasciare asset
+router.register(r'reports', ReportViewSet)  # User può scrivere report
+router.register(r'locations', LocationViewSet)  # Manager può aggiungere/modificare luoghi, user li vede
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('api/', include(router.urls)),
 ]

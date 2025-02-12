@@ -1,56 +1,61 @@
 from rest_framework import serializers
-from .models import Owner, Asset, Ownership,Location,Report
+from django.contrib.auth import get_user_model
+from .models import Asset, Location, Assignment, Acquisition, Report,CustomUser
 
-class OwnerSerializer(serializers.ModelSerializer):
-    owned_assets_count = serializers.SerializerMethodField()
+# Recupera il modello CustomUser
 
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Owner
-        fields = ['id', 'first_name', 'last_name', 'phone_number', 'email', 'owned_assets_count']  # Aggiunto email
+        model = CustomUser
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role']
 
-    def get_owned_assets_count(self, obj):
-        return obj.ownership_set.count()  # Conta quanti asset possiede il proprietario
+# Serializer per la registrazione degli utenti
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'role']
 
-
+# Serializer per gli asset
 class AssetSerializer(serializers.ModelSerializer):
-    available_quantity = serializers.SerializerMethodField()
-
     class Meta:
         model = Asset
-        fields = ['id', 'name', 'description', 'quantity', 'available_quantity']
+        fields = ['id', 'name', 'description', 'total_quantity', 'created_at', 'updated_at']
 
-    def get_available_quantity(self, obj):
-        assigned = sum(obj.ownership_set.values_list('quantity', flat=True))
-        return obj.quantity - assigned  # Restituisce quanti asset sono ancora assegnabili
-
-
+# Serializer per le location
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = '__all__'
+        fields = ['id', 'name', 'address', 'description']
 
-
-class OwnershipSerializer(serializers.ModelSerializer):
-    owner_name = serializers.CharField(source='owner.first_name', read_only=True)
-    asset_name = serializers.CharField(source='asset.name', read_only=True)
-    location_name = serializers.CharField(source='location.name', read_only=True)
-
-    asset = serializers.PrimaryKeyRelatedField(queryset=Asset.objects.all())
-    owner = serializers.PrimaryKeyRelatedField(queryset=Owner.objects.all())
-    location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all(), allow_null=True, required=False)
-
+# Serializer per le assegnazioni degli asset agli utenti
+class AssignmentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()  # Mostra il nome utente invece dell'ID
+    manager = serializers.StringRelatedField()
+    asset = serializers.StringRelatedField()
 
     class Meta:
-        model = Ownership
-        fields = ['id', 'owner_name', 'asset_name', 'location_name', 'asset', 'owner', 'location', 'date_acquired', 'quantity']
+        model = Assignment
+        fields = ['id', 'user', 'manager', 'asset', 'assigned_quantity', 'assigned_at']
 
+# Serializer per le acquisizioni di asset dagli utenti
+class AcquisitionSerializer(serializers.ModelSerializer):
+    assignment = AssignmentSerializer(read_only=True)  # Mostra i dettagli dell'assegnazione
+    location = serializers.StringRelatedField()  # Mostra il nome della location
+
+    class Meta:
+        model = Acquisition
+        fields = ['id', 'assignment', 'quantity', 'acquired_at', 'is_active', 'location']
+
+# Serializer per i report generati dagli utenti
 class ReportSerializer(serializers.ModelSerializer):
-    owner_name = serializers.CharField(source='ownership.owner.first_name', read_only=True)
-    asset_name = serializers.CharField(source='ownership.asset.name', read_only=True)
+    acquisition = AcquisitionSerializer(read_only=True)  # Mostra i dettagli dell'acquisizione
 
     class Meta:
         model = Report
-        fields = ['id', 'ownership', 'owner_name', 'asset_name', 'title', 'description', 'created_at']
+        fields = ['id', 'acquisition', 'title', 'description', 'created_at']
+
 
 
 

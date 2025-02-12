@@ -1,24 +1,37 @@
 from django.db import models
+from django.utils.timezone import now
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
-class Owner(models.Model):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    phone_number = models.CharField(max_length=15, unique=True)
-    email = models.EmailField(blank=True, null=True, default="-")  # Nuovo campo email non obbligatorio
+
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = (
+        ('user', 'User'),
+        ('manager', 'Manager'),
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+
+    def is_manager(self):
+        return self.role == 'manager'
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.username} ({self.get_role_display()})"
 
-    def get_owned_assets_count(self):
-        return self.ownership_set.count()  # Conta quanti oggetti possiede il proprietario
 
 class Asset(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
-    quantity = models.PositiveIntegerField(default=1)  # Nuovo campo quantità
+    total_quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(default=now, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def available_quantity(self):
+        assigned = sum(a.assigned_quantity for a in self.assignments.all())
+        return self.total_quantity - assigned
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.total_quantity} disponibili)"
 
 class Location(models.Model):
     name = models.CharField(max_length=100)
@@ -28,22 +41,34 @@ class Location(models.Model):
     def __str__(self):
         return self.name
 
-class Ownership(models.Model):  # Storico proprietà e quantità
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)  # Se l'Asset viene cancellato, cancelliamo anche la proprietà
-    owner = models.ForeignKey(Owner, on_delete=models.CASCADE)  # Se il Proprietario viene cancellato, cancelliamo il record
-    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)  # Se una location viene cancellata, i record Ownership non vengono cancellati, ma la location sarà NULL
-    date_acquired = models.DateField()
-    quantity = models.PositiveIntegerField(default=1)
+
+
+class Assignment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="assignments")
+    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="assigned_by")
+    asset = models.ForeignKey("Asset", on_delete=models.CASCADE, related_name="assignments")
+    assigned_quantity = models.PositiveIntegerField(default=1)
+    assigned_at = models.DateTimeField(default=now)
 
     def __str__(self):
-        loc = f" at {self.location}" if self.location else ""
-        return f"{self.owner} owns {self.quantity} x {self.asset.name}{loc} since {self.date_acquired}"
+        return f"{self.assigned_quantity} x {self.asset.name} → {self.user.first_name} {self.user.last_name} (Assegnato da {self.manager.first_name if self.manager else 'N/A'})"
+
+
+class Acquisition(models.Model):
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="acquisitions")
+    quantity = models.PositiveIntegerField()
+    acquired_at = models.DateTimeField(default=now)
+    is_active = models.BooleanField(default=True)  # Indica se l'asset è ancora in uso
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, related_name="acquisitions")
+
+    def __str__(self):
+        return f"{self.quantity} x {self.assignment.asset.name} - {self.assignment.user.username} @ {self.location.name if self.location else 'N/A'}"
 
 class Report(models.Model):
-    ownership = models.ForeignKey(Ownership, on_delete=models.CASCADE)  # Collegato direttamente all'Ownership
-    title = models.CharField(max_length=200)  # Titolo del report
-    description = models.TextField(blank=True, null=True)  # Dettagli
-    created_at = models.DateTimeField(auto_now_add=True)  # Data creazione
+    acquisition = models.ForeignKey("Acquisition", on_delete=models.CASCADE, related_name="reports")
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    created_at = models.DateTimeField(default=now)
 
     def __str__(self):
-        return f"Report: {self.title} ({self.ownership.owner} - {self.ownership.asset})"
+        return f"Report: {self.title} - {self.acquisition.assignment.asset.name} ({self.acquisition.assignment.user.first_name})"
