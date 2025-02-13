@@ -72,13 +72,29 @@ class AssetViewSet(viewsets.ModelViewSet):
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        """Restituisce tutti gli asset per i manager e solo gli assegnati per gli utenti normali."""
+        if self.request.user.is_manager():
+            return Asset.objects.all()
+        else:
+            user_assignments = Assignment.objects.filter(user=self.request.user)
+            return Asset.objects.filter(assignments__in=user_assignments).distinct()
+
     @action(detail=False, methods=['get'], url_path='user')
     def user_assets(self, request):
-        """ Restituisce solo gli asset assegnati all'utente autenticato. """
+        """ Restituisce solo gli asset assegnati all'utente autenticato, con la quantità disponibile. """
         user_assignments = Assignment.objects.filter(user=request.user)
         user_assets = Asset.objects.filter(assignments__in=user_assignments).distinct()
+
+        # Calcola la quantità disponibile per ogni asset
+        for asset in user_assets:
+            asset.available_quantity = asset.total_quantity - sum(
+                Acquisition.objects.filter(assignment__asset=asset, is_active=True).values_list("quantity", flat=True)
+            )
+
         serializer = self.get_serializer(user_assets, many=True)
         return Response(serializer.data)
+
 
 
 class LocationViewSet(viewsets.ModelViewSet):
@@ -144,9 +160,10 @@ class AssignmentViewSet(viewsets.ModelViewSet):
 class AcquisitionViewSet(viewsets.ModelViewSet):
     queryset = Acquisition.objects.all()
     serializer_class = AcquisitionSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Gli user vedono solo le proprie acquisizioni, i manager vedono tutto."""
+        """User vede solo le proprie acquisizioni, Manager vede tutto."""
         if self.request.user.is_manager():
             return Acquisition.objects.all()
         return Acquisition.objects.filter(assignment__user=self.request.user)
@@ -156,13 +173,51 @@ class AcquisitionViewSet(viewsets.ModelViewSet):
         assignment = serializer.validated_data['assignment']
         quantity = serializer.validated_data['quantity']
 
+        # Controlla se l'utente sta acquisendo un asset che gli è stato assegnato
         if assignment.user != self.request.user:
             return Response({"error": "Non puoi acquisire asset non assegnati a te."}, status=403)
 
-        if quantity > assignment.asset.total_quantity:
-            return Response({"error": "Non ci sono abbastanza asset disponibili."}, status=400)
+        # Controlla se ha già un'acquisizione per questo asset
+        if Acquisition.objects.filter(assignment=assignment).exists():
+            return Response({"error": "Hai già un'acquisizione attiva per questo asset."}, status=400)
 
-        serializer.save()
+        # Salva l'acquisizione
+        acquisition = serializer.save()
+
+        # Registra la transazione in History
+        History.objects.create(
+            user=self.request.user,
+            asset=assignment.asset,
+            action="Acquisition",
+            date=acquisition.acquisition_date,
+            location=acquisition.location
+        )
+
+    def update(self, request, *args, **kwargs):
+        """Permette agli user di modificare solo la quantità di un'acquisizione esistente."""
+        instance = self.get_object()
+        if instance.assignment.user != request.user:
+            return Response({"error": "Non puoi modificare un'acquisizione non tua."}, status=403)
+
+        new_quantity = request.data.get("quantity", instance.quantity)
+
+        # Controlla che la quantità non superi gli asset disponibili
+        if new_quantity > instance.assignment.asset.total_quantity:
+            return Response({"error": "Quantità assegnata superiore al totale disponibile."}, status=400)
+
+        instance.quantity = new_quantity
+        instance.save()
+        return Response(AcquisitionSerializer(instance).data)
+
+    def destroy(self, request, *args, **kwargs):
+        """Permette agli user di eliminare solo le proprie acquisizioni."""
+        instance = self.get_object()
+        if instance.assignment.user != request.user:
+            return Response({"error": "Non puoi eliminare un'acquisizione non tua."}, status=403)
+
+        instance.delete()
+        return Response({"message": "Acquisizione rimossa con successo"}, status=204)
+
 
 
 # ✅ Viewset per i report

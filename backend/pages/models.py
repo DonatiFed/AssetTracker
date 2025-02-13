@@ -63,7 +63,7 @@ class Assignment(models.Model):
 
 class Acquisition(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="acquisitions")
-    quantity = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField()  #in futuroo si dovrà tenere conto di una total_quantity e una available_quantity
     acquired_at = models.DateTimeField(default=now)
     is_active = models.BooleanField(default=True)  # Indica se l'asset è ancora in uso
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, related_name="acquisitions")

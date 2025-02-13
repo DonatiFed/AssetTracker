@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Asset, Location, Assignment, Acquisition, Report,CustomUser
-
+from django.db.models import Sum
 # Recupera il modello CustomUser
 
 User = get_user_model()
@@ -42,9 +42,20 @@ class UserSerializer(serializers.ModelSerializer):
 
 # Serializer per gli asset
 class AssetSerializer(serializers.ModelSerializer):
+    available_quantity = serializers.SerializerMethodField()
+
     class Meta:
         model = Asset
-        fields = ['id', 'name', 'description', 'total_quantity', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'description', 'total_quantity', 'available_quantity', 'created_at', 'updated_at']
+
+    def get_available_quantity(self, obj):
+        """Calcola la quantità disponibile sottraendo le acquisizioni attive dalla quantità totale."""
+        acquired_quantity = Acquisition.objects.filter(assignment__asset=obj, is_active=True).aggregate(
+            total_acquired=Sum('quantity')
+        )['total_acquired'] or 0  # Se non ci sono acquisizioni attive, il valore è 0
+
+        return obj.total_quantity - acquired_quantity
+
 
 # Serializer per le location
 class LocationSerializer(serializers.ModelSerializer):
@@ -63,12 +74,29 @@ class AssignmentSerializer(serializers.ModelSerializer):
 
 # Serializer per le acquisizioni di asset dagli utenti
 class AcquisitionSerializer(serializers.ModelSerializer):
-    assignment = AssignmentSerializer(read_only=True)  # Mostra i dettagli dell'assegnazione
+    assignment = serializers.PrimaryKeyRelatedField(queryset=Assignment.objects.all())  # Permette di inviare l'ID invece dell'intero oggetto
     location = serializers.StringRelatedField()  # Mostra il nome della location
 
     class Meta:
         model = Acquisition
         fields = ['id', 'assignment', 'quantity', 'acquired_at', 'is_active', 'location']
+
+    def validate_quantity(self, value):
+        """ Verifica che la quantità richiesta sia valida. """
+        assignment = self.instance.assignment if self.instance else self.initial_data.get("assignment")
+
+        if not assignment:
+            raise serializers.ValidationError("L'assegnazione è richiesta.")
+
+        assignment_obj = Assignment.objects.get(id=assignment)
+
+        if value <= 0:
+            raise serializers.ValidationError("La quantità deve essere maggiore di zero.")
+
+        if value > assignment_obj.asset.total_quantity:
+            raise serializers.ValidationError("Non ci sono abbastanza asset disponibili.")
+
+        return value
 
 # Serializer per i report generati dagli utenti
 class ReportSerializer(serializers.ModelSerializer):
