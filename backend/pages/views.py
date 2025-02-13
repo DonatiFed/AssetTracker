@@ -2,7 +2,7 @@ from rest_framework import viewsets, permissions,status,generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.decorators import api_view, permission_classes,action
-from django.db.models import Sum
+from django.db.models import Sum,Exists,OuterRef,Prefetch
 
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
@@ -73,28 +73,21 @@ class AssetViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Restituisce tutti gli asset per i manager e solo gli assegnati per gli utenti normali."""
-        if self.request.user.is_manager():
+        user = self.request.user
+        if user.is_manager:
             return Asset.objects.all()
-        else:
-            user_assignments = Assignment.objects.filter(user=self.request.user)
-            return Asset.objects.filter(assignments__in=user_assignments).distinct()
+        return Asset.objects.filter(assignments__user=user, assignments__is_active=True).distinct()
 
     @action(detail=False, methods=['get'], url_path='user')
     def user_assets(self, request):
-        """ Restituisce solo gli asset assegnati all'utente autenticato, con la quantità disponibile. """
-        user_assignments = Assignment.objects.filter(user=request.user)
-        user_assets = Asset.objects.filter(assignments__in=user_assignments).distinct()
-
-        # Calcola la quantità disponibile per ogni asset
+        user_assets = Asset.objects.filter(assignments__user=request.user, assignments__is_active=True).distinct()
         for asset in user_assets:
-            asset.available_quantity = asset.total_quantity - sum(
-                Acquisition.objects.filter(assignment__asset=asset, is_active=True).values_list("quantity", flat=True)
-            )
-
+            acquired = \
+            Acquisition.objects.filter(assignment__asset=asset, is_active=True).aggregate(total=Sum('quantity'))[
+                'total'] or 0
+            asset.available_quantity = asset.total_quantity - acquired
         serializer = self.get_serializer(user_assets, many=True)
         return Response(serializer.data)
-
 
 
 class LocationViewSet(viewsets.ModelViewSet):
@@ -108,116 +101,65 @@ class LocationViewSet(viewsets.ModelViewSet):
 
 
 # ✅ Viewset per le assegnazioni di asset
+# Viewset per le assignments
 class AssignmentViewSet(viewsets.ModelViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        user_id = request.data.get("user")
-        asset_id = request.data.get("asset")
-        assigned_quantity = int(request.data.get("assigned_quantity", 0))
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_manager:
+            return Assignment.objects.all()
+        return Assignment.objects.filter(user=user, is_active=True)
 
-        # Verifica se l'utente e l'asset esistono
-        try:
-            user = CustomUser.objects.get(id=user_id)
-            asset = Asset.objects.get(id=asset_id)
-        except (CustomUser.DoesNotExist, Asset.DoesNotExist):
-            return Response({"error": "Utente o asset non valido"}, status=400)
-
-        # Controlla se esiste già un'assegnazione per questo asset a questo user
-        existing_assignment = Assignment.objects.filter(user=user, asset=asset).exists()
-        if existing_assignment:
-            return Response({"error": "Questo asset è già stato assegnato all'utente"}, status=400)
-
-        # Controlla che la quantità assegnata non superi il totale dell'asset
-        if assigned_quantity > asset.total_quantity:
-            return Response({"error": "Quantità assegnata superiore al totale disponibile"}, status=400)
-
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        new_quantity = int(request.data.get("assigned_quantity", instance.assigned_quantity))
-
-        # Verifica che la nuova quantità assegnata non superi il totale degli asset
-        if new_quantity > instance.asset.total_quantity:
-            return Response({"error": "Quantità assegnata superiore al totale disponibile"}, status=400)
-
-        instance.assigned_quantity = new_quantity
-        instance.save()
-        return Response(AssignmentSerializer(instance).data)
-
-    @action(detail=True, methods=["DELETE"])
-    def remove(self, request, pk=None):
+    @action(detail=True, methods=['patch'], url_path='deactivate')
+    def deactivate(self, request, pk=None):
         assignment = self.get_object()
-        assignment.delete()
-        return Response({"message": "Assegnazione rimossa con successo"}, status=204)
+        assignment.is_active = False
+        assignment.save()
+        return Response(AssignmentSerializer(assignment).data)
 
 
 
 # ✅ Viewset per le acquisizioni di asset
 class AcquisitionViewSet(viewsets.ModelViewSet):
-    queryset = Acquisition.objects.all()
+    queryset = Acquisition.objects.select_related('assignment__asset').all()
     serializer_class = AcquisitionSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """User vede solo le proprie acquisizioni, Manager vede tutto."""
+        """User vede solo le proprie acquisizioni attive, Manager vede tutte."""
         if self.request.user.is_manager():
-            return Acquisition.objects.all()
-        return Acquisition.objects.filter(assignment__user=self.request.user)
-
-    def perform_create(self, serializer):
-        """L’utente può acquisire solo asset assegnati e disponibili."""
-        assignment = serializer.validated_data['assignment']
-        quantity = serializer.validated_data['quantity']
-
-        # Controlla se l'utente sta acquisendo un asset che gli è stato assegnato
-        if assignment.user != self.request.user:
-            return Response({"error": "Non puoi acquisire asset non assegnati a te."}, status=403)
-
-        # Controlla se ha già un'acquisizione per questo asset
-        if Acquisition.objects.filter(assignment=assignment).exists():
-            return Response({"error": "Hai già un'acquisizione attiva per questo asset."}, status=400)
-
-        # Salva l'acquisizione
-        acquisition = serializer.save()
-
-        # Registra la transazione in History
-        History.objects.create(
-            user=self.request.user,
-            asset=assignment.asset,
-            action="Acquisition",
-            date=acquisition.acquisition_date,
-            location=acquisition.location
+            return Acquisition.objects.select_related('assignment__asset')
+        return Acquisition.objects.select_related('assignment__asset').filter(
+            assignment__user=self.request.user,
+            is_active=True
         )
 
+    def perform_create(self, serializer):
+        """Permette solo acquisizioni sugli asset assegnati."""
+        assignment = serializer.validated_data['assignment']
+        if assignment.user != self.request.user:
+            return Response({"error": "Non puoi acquisire asset non assegnati a te."}, status=403)
+        if Acquisition.objects.filter(assignment=assignment, is_active=True).exists():
+            return Response({"error": "Hai già un'acquisizione attiva per questo asset."}, status=400)
+        serializer.save()
+
     def update(self, request, *args, **kwargs):
-        """Permette agli user di modificare solo la quantità di un'acquisizione esistente."""
+        """Permette la modifica solo della quantità per acquisizioni proprie attive."""
         instance = self.get_object()
-        if instance.assignment.user != request.user:
-            return Response({"error": "Non puoi modificare un'acquisizione non tua."}, status=403)
+        if instance.assignment.user != request.user or not instance.is_active:
+            return Response({"error": "Non puoi modificare questa acquisizione."}, status=403)
+        return super().update(request, *args, **kwargs)
 
-        new_quantity = request.data.get("quantity", instance.quantity)
-
-        # Controlla che la quantità non superi gli asset disponibili
-        if new_quantity > instance.assignment.asset.total_quantity:
-            return Response({"error": "Quantità assegnata superiore al totale disponibile."}, status=400)
-
-        instance.quantity = new_quantity
-        instance.save()
-        return Response(AcquisitionSerializer(instance).data)
-
-    def destroy(self, request, *args, **kwargs):
-        """Permette agli user di eliminare solo le proprie acquisizioni."""
-        instance = self.get_object()
-        if instance.assignment.user != request.user:
-            return Response({"error": "Non puoi eliminare un'acquisizione non tua."}, status=403)
-
-        instance.delete()
-        return Response({"message": "Acquisizione rimossa con successo"}, status=204)
-
+    @action(detail=True, methods=['patch'], url_path='deactivate')
+    def deactivate(self, request, pk=None):
+        """Permette di disattivare un'acquisizione."""
+        acquisition = self.get_object()
+        acquisition.is_active = False
+        acquisition.save()
+        return Response(AcquisitionSerializer(acquisition).data)
 
 
 # ✅ Viewset per i report

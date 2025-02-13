@@ -91,12 +91,11 @@ function Assets() {
             const response = await axios.post("http://localhost:8001/api/assets/", newAsset, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
             setAssets([...assets, response.data]);
             setNewAsset({ name: "", description: "", total_quantity: 0 });
             setShowModal(false);
         } catch (error) {
-            console.error("Errore nell'aggiunta dell'asset:", error);
+            console.error("Errore nell'aggiunta dell'asset:", error.response?.data || error.message);
         }
     };
 
@@ -128,7 +127,6 @@ function Assets() {
                             <th>Totali</th>
                             <th>Disponibili</th>
                             {role === "manager" && <th>Data Creazione</th>}
-                            {role === "manager" && <th>Ultima Modifica</th>}
                             {role === "manager" && <th>Azioni</th>}
                         </tr>
                         </thead>
@@ -141,7 +139,6 @@ function Assets() {
                                 <td>{asset.total_quantity}</td>
                                 <td>{asset.available_quantity}</td>
                                 {role === "manager" && <td>{asset.created_at}</td>}
-                                {role === "manager" && <td>{asset.updated_at}</td>}
                                 {role === "manager" && (
                                     <td className="actions-column">
                                         <div className="dropdown" ref={(el) => (menuRefs.current[asset.id] = el)}>

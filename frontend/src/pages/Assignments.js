@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import "../style.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import axios from "axios";
+import AddItemModal from "../components/AddItemModal";
 
 function Assignments() {
     const [assignments, setAssignments] = useState([]);
@@ -10,10 +11,10 @@ function Assignments() {
     const [assets, setAssets] = useState([]);
     const [menuOpen, setMenuOpen] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
     const [error, setError] = useState("");
-
+    const [isLoading, setIsLoading] = useState(false);
     const [selectedAssignment, setSelectedAssignment] = useState(null);
+
     const [newAssignment, setNewAssignment] = useState({
         user: "",
         asset: "",
@@ -22,6 +23,7 @@ function Assignments() {
 
     const menuRefs = useRef({});
 
+    // Fetch iniziale dati
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -49,82 +51,68 @@ function Assignments() {
         setMenuOpen(menuOpen === id ? null : id);
     };
 
-    const handleAddAssignment = async () => {
+    // Aggiunta nuovo assignment
+    const handleAddAssignment = async (formData) => {
         try {
+            setIsLoading(true);
             const token = localStorage.getItem("access_token");
             const headers = { Authorization: `Bearer ${token}` };
 
+            // Verifica se esiste già un'assegnazione attiva per lo stesso asset e utente
             const existingAssignment = assignments.find(
-                (a) => a.user === newAssignment.user && a.asset === newAssignment.asset
+                (a) =>
+                    a.user === formData.user &&
+                    a.asset === formData.asset &&
+                    a.is_active
             );
 
             if (existingAssignment) {
                 setError("Questo asset è già stato assegnato a questo utente.");
+                setIsLoading(false);
                 return;
             }
 
-            const asset = assets.find(a => a.id === Number(newAssignment.asset));
-            if (asset && newAssignment.assigned_quantity > asset.total_quantity) {
-                setError(`Massimo assegnabile: ${asset.total_quantity}`);
-                return;
-            }
-
+            // POST all'API
             const response = await axios.post(
                 "http://localhost:8001/api/assignments/",
-                newAssignment,
+                formData,
                 { headers }
             );
 
+            // Aggiorna stato con il nuovo assignment
             setAssignments([...assignments, response.data]);
             setShowAddModal(false);
-            setNewAssignment({ user: "", asset: "", assigned_quantity: 1 });
             setError("");
         } catch (error) {
             console.error("Errore durante l'assegnazione:", error);
             setError("Errore durante l'assegnazione.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleEditAssignment = async () => {
-        try {
-            if (!selectedAssignment) return;
 
-            const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-
-            const asset = assets.find(a => a.id === Number(selectedAssignment.asset));
-            if (asset && selectedAssignment.assigned_quantity > asset.total_quantity) {
-                setError(`Massimo assegnabile: ${asset.total_quantity}`);
-                return;
-            }
-
-            const response = await axios.patch(
-                `http://localhost:8001/api/assignments/${selectedAssignment.id}/`,
-                { assigned_quantity: selectedAssignment.assigned_quantity },
-                { headers }
-            );
-
-            setAssignments(assignments.map(a => (a.id === response.data.id ? response.data : a)));
-            setShowEditModal(false);
-            setSelectedAssignment(null);
-            setError("");
-        } catch (error) {
-            console.error("Errore nella modifica dell'assegnazione:", error);
-            setError("Errore durante la modifica.");
-        }
-    };
-
+    // Disattivazione assignment
     const handleRemoveAssignment = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
             const headers = { Authorization: `Bearer ${token}` };
 
-            await axios.delete(`http://localhost:8001/api/assignments/${id}/`, { headers });
+            const response = await axios.patch(
+                `http://localhost:8001/api/assignments/${id}/deactivate/`,
+                {},
+                { headers }
+            );
 
-            setAssignments(assignments.filter(a => a.id !== id));
+            // Aggiorna lo stato locale
+            setAssignments(
+                assignments.map((a) =>
+                    a.id === response.data.id ? { ...a, is_active: false } : a
+                )
+            );
         } catch (error) {
-            console.error("Errore nella rimozione dell'assegnazione:", error);
-            setError("Errore durante la rimozione.");
+            console.error("Errore nella disattivazione dell'assegnazione:", error);
+            setError("Errore durante la disattivazione.");
         }
     };
 
@@ -134,7 +122,9 @@ function Assignments() {
             <div className="table-container">
                 <div className="table-header">
                     <h1>Gestione Assegnazioni</h1>
-                    <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Assegna Asset</button>
+                    <button className="add-button" onClick={() => setShowAddModal(true)}>
+                        ➕ Assegna Asset
+                    </button>
                 </div>
                 {error && <p className="error-message">{error}</p>}
                 <table className="styled-table">
@@ -144,7 +134,7 @@ function Assignments() {
                         <th>Nome Utente</th>
                         <th>ID Asset</th>
                         <th>Nome Asset</th>
-                        <th>Quantità Assegnata</th>
+                        <th>Stato</th>
                         <th>Azioni</th>
                     </tr>
                     </thead>
@@ -155,17 +145,31 @@ function Assignments() {
                             <td>{assignment.user_name}</td>
                             <td>{assignment.asset}</td>
                             <td>{assignment.asset_name}</td>
-                            <td>{assignment.assigned_quantity}</td>
+                            <td className={assignment.is_active ? "active" : "inactive"}>
+                                {assignment.is_active ? "Attivo" : "Disattivato"}
+                            </td>
                             <td className="actions-column">
-                                <div className="dropdown" ref={(el) => (menuRefs.current[assignment.id] = el)}>
-                                    <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(assignment.id)} />
+                                <div
+                                    className="dropdown"
+                                    ref={(el) => (menuRefs.current[assignment.id] = el)}
+                                >
+                                    <BsThreeDotsVertical
+                                        className="menu-icon"
+                                        onClick={() => toggleMenu(assignment.id)}
+                                    />
                                     {menuOpen === assignment.id && (
                                         <div className="dropdown-menu show">
-                                            <p onClick={() => {
-                                                setSelectedAssignment(assignment);
-                                                setShowEditModal(true);
-                                            }}>✏️ Modifica</p>
-                                            <p onClick={() => handleRemoveAssignment(assignment.id)}>🗑️ Rimuovi</p>
+                                            {assignment.is_active ? (
+                                                <p
+                                                    onClick={() =>
+                                                        handleRemoveAssignment(assignment.id)
+                                                    }
+                                                >
+                                                    🛑 Disattiva
+                                                </p>
+                                            ) : (
+                                                <p className="disabled">🚫 Già disattivato</p>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -176,32 +180,38 @@ function Assignments() {
                 </table>
             </div>
 
-            {showEditModal && selectedAssignment && (
-                <div className="modal-overlay">
-                    <div className="modal-container">
-                        <h2>Modifica Assegnazione</h2>
-                        {error && <p className="error-message">{error}</p>}
-                        <label>Quantità:</label>
-                        <input
-                            type="number"
-                            value={selectedAssignment.assigned_quantity}
-                            min="1"
-                            onChange={(e) =>
-                                setSelectedAssignment({ ...selectedAssignment, assigned_quantity: parseInt(e.target.value) })
-                            }
-                        />
-                        <div className="modal-buttons">
-                            <button className="save-btn" onClick={handleEditAssignment}>Salva</button>
-                            <button className="cancel-btn" onClick={() => setShowEditModal(false)}>Annulla</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <AddItemModal
+                show={showAddModal}
+                handleClose={() => setShowAddModal(false)}
+                handleSave={handleAddAssignment}
+                fields={[
+                    {
+                        name: "user",
+                        label: "Utente",
+                        type: "select",
+                        options: users.map(user => ({
+                            value: user.id,
+                            label: user.username
+                        }))
+                    },
+                    {
+                        name: "asset",
+                        label: "Asset",
+                        type: "select",
+                        options: assets.map(asset => ({
+                            value: asset.id,
+                            label: asset.name
+                        }))
+                    }
+                ]}
+            />
         </>
     );
 }
 
 export default Assignments;
+
+
 
 
 

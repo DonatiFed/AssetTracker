@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import UserInfo from "../components/UserInfo";
 import "../style.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import AddItemModal from "../components/AddItemModal";
 
 // Mock data per le acquisizioni (visibili solo al manager)
 const mockAcquisitions = [

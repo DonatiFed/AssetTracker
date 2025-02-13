@@ -46,7 +46,7 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ['id', 'name', 'description', 'total_quantity', 'available_quantity', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'description', 'total_quantity', 'available_quantity', 'created_at']
 
     def get_available_quantity(self, obj):
         """Calcola la quantità disponibile sottraendo le acquisizioni attive dalla quantità totale."""
@@ -64,39 +64,58 @@ class LocationSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'description']
 
 
+## Serializer per Assignment
 class AssignmentSerializer(serializers.ModelSerializer):
     user_name = serializers.ReadOnlyField(source="user.username")
     asset_name = serializers.ReadOnlyField(source="asset.name")
 
     class Meta:
         model = Assignment
-        fields = ["id", "user", "user_name", "asset", "asset_name", "assigned_quantity", "assigned_at"]
+        fields = ["id", "user", "user_name", "asset", "asset_name", "is_active", "assigned_at"]
 
-# Serializer per le acquisizioni di asset dagli utenti
+    def validate(self, data):
+        """ Impedisce più assignment attivi per la stessa coppia user-asset. """
+        user = data['user']
+        asset = data['asset']
+        if Assignment.objects.filter(user=user, asset=asset, is_active=True).exclude(
+                id=self.instance.id if self.instance else None).exists():
+            raise serializers.ValidationError("Esiste già un assignment attivo per questo utente e asset.")
+        return data
+
+
+## Serializer per Acquisition
 class AcquisitionSerializer(serializers.ModelSerializer):
-    assignment = serializers.PrimaryKeyRelatedField(queryset=Assignment.objects.all())  # Permette di inviare l'ID invece dell'intero oggetto
-    location = serializers.StringRelatedField()  # Mostra il nome della location
+    assignment = serializers.PrimaryKeyRelatedField(queryset=Assignment.objects.all())
+    location = serializers.StringRelatedField()
+
+    asset_name = serializers.CharField(source='assignment.asset.name', read_only=True)
+    user_name = serializers.CharField(source='assignment.user.username', read_only=True)
 
     class Meta:
         model = Acquisition
-        fields = ['id', 'assignment', 'quantity', 'acquired_at', 'is_active', 'location']
+        fields = ['id', 'assignment', 'asset_name', 'user_name', 'quantity', 'acquired_at', 'is_active', 'location']
 
-    def validate_quantity(self, value):
-        """ Verifica che la quantità richiesta sia valida. """
-        assignment = self.instance.assignment if self.instance else self.initial_data.get("assignment")
+    def validate(self, data):
+        """ Impedisce più acquisition attive per lo stesso assignment e controlla la quantità disponibile. """
+        assignment = data['assignment']
+        quantity = data['quantity']
 
-        if not assignment:
-            raise serializers.ValidationError("L'assegnazione è richiesta.")
+        if Acquisition.objects.filter(
+            assignment=assignment,
+            is_active=True
+        ).exclude(id=self.instance.id if self.instance else None).exists():
+            raise serializers.ValidationError("Esiste già un'acquisition attiva per questo assignment.")
 
-        assignment_obj = Assignment.objects.get(id=assignment)
+        acquired_total = Acquisition.objects.filter(
+            assignment=assignment, is_active=True
+        ).aggregate(total_acquired=Sum('quantity'))['total_acquired'] or 0
 
-        if value <= 0:
-            raise serializers.ValidationError("La quantità deve essere maggiore di zero.")
+        available = assignment.asset.total_quantity - acquired_total
+        if quantity > available:
+            raise serializers.ValidationError(f"Quantità non disponibile. Massimo disponibile: {available}.")
 
-        if value > assignment_obj.asset.total_quantity:
-            raise serializers.ValidationError("Non ci sono abbastanza asset disponibili.")
+        return data
 
-        return value
 
 # Serializer per i report generati dagli utenti
 class ReportSerializer(serializers.ModelSerializer):
