@@ -93,7 +93,7 @@ function Assets() {
             });
 
             setAssets([...assets, response.data]);
-            setNewAsset({ name: "", description: "", total_quantity: 0 }); // Reset dei campi dopo aggiunta
+            setNewAsset({ name: "", description: "", total_quantity: 0 });
             setShowModal(false);
         } catch (error) {
             console.error("Errore nell'aggiunta dell'asset:", error);
@@ -111,7 +111,7 @@ function Assets() {
                         {role === "manager" && (
                             <button className="add-button" onClick={() => {
                                 setEditAsset(null);
-                                setNewAsset({ name: "", description: "", total_quantity: 0 }); // Reset input fields
+                                setNewAsset({ name: "", description: "", total_quantity: 0 });
                                 setShowModal(true);
                             }}>
                                 ➕ Aggiungi Asset
@@ -125,6 +125,7 @@ function Assets() {
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Descrizione</th>
+                            <th>Totali</th>
                             <th>Disponibili</th>
                             {role === "manager" && <th>Data Creazione</th>}
                             {role === "manager" && <th>Ultima Modifica</th>}
@@ -138,6 +139,7 @@ function Assets() {
                                 <td>{asset.name}</td>
                                 <td>{asset.description}</td>
                                 <td>{asset.total_quantity}</td>
+                                <td>{asset.available_quantity}</td>
                                 {role === "manager" && <td>{asset.created_at}</td>}
                                 {role === "manager" && <td>{asset.updated_at}</td>}
                                 {role === "manager" && (
@@ -185,7 +187,7 @@ function Assets() {
                         />
                         <input
                             type="number"
-                            placeholder="Disponibili"
+                            placeholder="Totali"
                             value={editAsset ? editAsset.total_quantity : newAsset.total_quantity}
                             onChange={(e) => editAsset
                                 ? setEditAsset({ ...editAsset, total_quantity: parseInt(e.target.value) })
@@ -206,6 +208,7 @@ function Assets() {
 }
 
 export default Assets;
+
 
 
 

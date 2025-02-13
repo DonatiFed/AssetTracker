@@ -1,17 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../style.css";
 
 function AddItemModal({ show, handleClose, handleSave, fields }) {
     const [formData, setFormData] = useState({});
 
+    useEffect(() => {
+        if (!show) {
+            setFormData({}); // Resetta i campi quando il modal si chiude
+        }
+    }, [show]);
+
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value, type } = e.target;
+        setFormData({
+            ...formData,
+            [name]: type === "number" ? parseInt(value, 10) || "" : value
+        });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         handleSave(formData);
-        setFormData({});
+        setFormData({}); // Reset campi dopo il salvataggio
     };
 
     if (!show) return null;
@@ -25,10 +35,17 @@ function AddItemModal({ show, handleClose, handleSave, fields }) {
                         <div key={field.name} className="form-group">
                             <label>{field.label}</label>
                             {field.type === "select" ? (
-                                <select name={field.name} value={formData[field.name] || ""} onChange={handleChange} required>
+                                <select
+                                    name={field.name}
+                                    value={formData[field.name] || ""}
+                                    onChange={handleChange}
+                                    required
+                                >
                                     <option value="">Seleziona</option>
                                     {field.options.map((option) => (
-                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
                                     ))}
                                 </select>
                             ) : (
@@ -57,6 +74,7 @@ function AddItemModal({ show, handleClose, handleSave, fields }) {
 }
 
 export default AddItemModal;
+
 
 
 
