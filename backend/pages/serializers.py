@@ -86,7 +86,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
 ## Serializer per Acquisition
 class AcquisitionSerializer(serializers.ModelSerializer):
     assignment = serializers.PrimaryKeyRelatedField(queryset=Assignment.objects.all())
-    location = serializers.StringRelatedField()
+    location=serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
 
     asset_name = serializers.CharField(source='assignment.asset.name', read_only=True)
     user_name = serializers.CharField(source='assignment.user.username', read_only=True)
@@ -95,8 +95,14 @@ class AcquisitionSerializer(serializers.ModelSerializer):
         model = Acquisition
         fields = ['id', 'assignment', 'asset_name', 'user_name', 'quantity', 'acquired_at', 'is_active', 'location']
 
+    def create(self, validated_data):
+        print("Creazione acquisizione con dati:", validated_data)  # DEBUG
+        acquisition = Acquisition.objects.create(**validated_data)
+        acquisition.save()  # FORZA IL SALVATAGGIO
+        return acquisition
+
     def validate(self, data):
-        """ Impedisce più acquisition attive per lo stesso assignment e controlla la quantità disponibile. """
+        """ Impedisce più acquisition attive per lo stesso assignment e controlla la quantità disponibile."""
         assignment = data['assignment']
         quantity = data['quantity']
 

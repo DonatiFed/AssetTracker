@@ -103,13 +103,20 @@ class LocationViewSet(viewsets.ModelViewSet):
 # ✅ Viewset per le assegnazioni di asset
 # Viewset per le assignments
 class AssignmentViewSet(viewsets.ModelViewSet):
-    queryset = Assignment.objects.all()
+    queryset = Assignment.objects.none()  # 🔹 Evita che Django usi un queryset globale
     serializer_class = AssignmentSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_manager:
+        print(f"DEBUG: Utente {user.username} - is_manager: {getattr(user, 'is_manager', 'Non definito')}")  # Log utile
+
+        # Controlla se is_manager è un metodo o un campo
+        is_manager = user.is_manager if isinstance(user.is_manager, bool) else user.is_manager()
+
+        print(f"DEBUG: is_manager valutato come {is_manager}")  # Controllo finale
+
+        if is_manager:
             return Assignment.objects.all()
         return Assignment.objects.filter(user=user, is_active=True)
 
@@ -137,21 +144,73 @@ class AcquisitionViewSet(viewsets.ModelViewSet):
             is_active=True
         )
 
-    def perform_create(self, serializer):
-        """Permette solo acquisizioni sugli asset assegnati."""
+    def create(self, request, *args, **kwargs):
+        """Gestisce la creazione dell'acquisizione."""
+        print("✅ Richiesta ricevuta: CREAZIONE ACQUISIZIONE")  # DEBUG
+
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print("❌ ERRORE: Dati non validi", serializer.errors)  # DEBUG
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         assignment = serializer.validated_data['assignment']
-        if assignment.user != self.request.user:
-            return Response({"error": "Non puoi acquisire asset non assegnati a te."}, status=403)
+
+        # Controllo che l'utente sia assegnatario dell'asset
+        if not request.user.is_manager():  # Se NON è un manager, facciamo i controlli
+            if assignment.user != request.user:
+                print("❌ ERRORE: Utente non autorizzato")  # DEBUG
+                return Response({"error": "Non puoi acquisire asset non assegnati a te."},
+                                status=status.HTTP_403_FORBIDDEN)
+
+        # Controllo che non esista già un'acquisizione attiva
         if Acquisition.objects.filter(assignment=assignment, is_active=True).exists():
-            return Response({"error": "Hai già un'acquisizione attiva per questo asset."}, status=400)
-        serializer.save()
+            print("❌ ERRORE: Acquisizione già esistente")  # DEBUG
+            return Response({"error": "Hai già un'acquisizione attiva per questo asset."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        print("✅ Nessun errore. Creazione acquisizione...")  # DEBUG
+        acquisition = serializer.save()
+        acquisition.save()
+        print(f"✅ Acquisizione salvata! ID: {acquisition.id}")  # DEBUG
+
+        return Response(AcquisitionSerializer(acquisition).data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         """Permette la modifica solo della quantità per acquisizioni proprie attive."""
         instance = self.get_object()
-        if instance.assignment.user != request.user or not instance.is_active:
-            return Response({"error": "Non puoi modificare questa acquisizione."}, status=403)
-        return super().update(request, *args, **kwargs)
+
+        # Se non è un manager, controlliamo che l'utente sia il proprietario
+        if not request.user.is_manager and (instance.assignment.user != request.user or not instance.is_active):
+            return Response({"error": "Non puoi modificare questa acquisizione."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Controlla che il campo 'quantity' sia presente nella richiesta
+        new_quantity = request.data.get("quantity")
+        if new_quantity is None:
+            return Response({"error": "Il campo 'quantity' è richiesto."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Converte in numero e verifica validità
+        try:
+            new_quantity = int(new_quantity)
+        except ValueError:
+            return Response({"error": "La quantità deve essere un numero intero valido."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Verifica che la quantità sia disponibile
+        assigned_quantity = instance.assignment.asset.total_quantity
+        acquired_total = Acquisition.objects.filter(
+            assignment=instance.assignment, is_active=True
+        ).exclude(id=instance.id).aggregate(total_acquired=Sum('quantity'))['total_acquired'] or 0
+
+        max_available = assigned_quantity - acquired_total
+        if new_quantity > max_available:
+            return Response({"error": f"Quantità non disponibile. Massimo disponibile: {max_available}."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Aggiorna solo il campo quantità
+        instance.quantity = new_quantity
+        instance.save()
+
+        return Response(AcquisitionSerializer(instance).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['patch'], url_path='deactivate')
     def deactivate(self, request, pk=None):
@@ -164,7 +223,7 @@ class AcquisitionViewSet(viewsets.ModelViewSet):
 
 # ✅ Viewset per i report
 class ReportViewSet(viewsets.ModelViewSet):
-    queryset = Report.objects.all()
+    queryset = Report.objects.none()
     serializer_class = ReportSerializer
 
     def get_queryset(self):
@@ -173,7 +232,7 @@ class ReportViewSet(viewsets.ModelViewSet):
             return Report.objects.all()
         return Report.objects.filter(acquisition__assignment__user=self.request.user)
 
-    def perform_create(self, serializer):
+    def create(self, serializer):
         """Permettiamo solo agli utenti di creare report per le proprie acquisizioni."""
         acquisition = serializer.validated_data['acquisition']
         if acquisition.assignment.user != self.request.user:
