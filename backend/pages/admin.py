@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Asset, Location, Assignment, Acquisition, Report
+from django.db.models import Sum,Exists,OuterRef
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -22,9 +23,21 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
-    list_display = ('name', 'total_quantity', 'created_at', 'updated_at')
+    list_display = ('name', 'total_quantity', 'created_at', 'available_quantity')
     search_fields = ('name',)
-    list_filter = ('created_at', 'updated_at')
+    list_filter = ('created_at',)
+    readonly_fields = ('available_quantity',)
+
+    def available_quantity(self, obj):
+        """Calcola la quantità disponibile in base alle acquisizioni attive."""
+        acquired_quantity = Acquisition.objects.filter(
+            assignment__asset=obj,
+            is_active=True
+        ).aggregate(total_acquired=Sum('quantity'))['total_acquired'] or 0
+
+        return obj.total_quantity - acquired_quantity
+
+    available_quantity.short_description = "Quantità Disponibile"
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
@@ -33,9 +46,17 @@ class LocationAdmin(admin.ModelAdmin):
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'manager', 'asset', 'assigned_quantity', 'assigned_at')
-    search_fields = ('user__username', 'manager__username', 'asset__name')
-    list_filter = ('assigned_at',)
+    list_display = ('user', 'asset', 'is_active', 'assigned_at')
+    list_filter = ('is_active', 'asset')
+    search_fields = ('user__username', 'asset__name')
+    ordering = ('-assigned_at',)
+    actions = ['mark_as_inactive']
+
+    def mark_as_inactive(self, request, queryset):
+        """Segna gli assignments selezionati come inattivi (soft delete)."""
+        queryset.update(is_active=False)
+
+    mark_as_inactive.short_description = "Segna come inattivi"
 
 @admin.register(Acquisition)
 class AcquisitionAdmin(admin.ModelAdmin):
