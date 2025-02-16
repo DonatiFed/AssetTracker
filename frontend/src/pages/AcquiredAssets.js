@@ -4,11 +4,13 @@ import UserInfo from "../components/UserInfo";
 import AddItemModal from "../components/AddItemModal";
 import EditItemModal from "../components/EditItemModal";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
 import axios from "axios";
 import "../style.css";
 import acquisitions from "./Acquisitions";
 
 function AcquiredAssets() {
+    const [acquisitions, setAcquisitions] = useState([]);
     const [acquiredAssets, setAcquiredAssets] = useState([]);
     const [assignments, setAssignments] = useState([]);
     const [locations, setLocations] = useState([]);
@@ -16,6 +18,8 @@ function AcquiredAssets() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedAsset, setSelectedAsset] = useState(null);
+    const [showActiveOnly, setShowActiveOnly] = useState(true);
+    const [sortOrder, setSortOrder] = useState("asc"); // asc o desc
     const [error, setError] = useState("");
 
     const [newAssignment, setNewAssignment] = useState({
@@ -37,6 +41,7 @@ function AcquiredAssets() {
                 ]);
 
                 setAcquiredAssets(acquisitionsRes.data);
+                setAcquisitions(acquisitionsRes.data);
                 setAssignments(assignmentsRes.data.filter(a => a.is_active));
                 setLocations(locationsRes.data);
                 console.log("📌 DEBUG: Dati assignments ricevuti:", assignmentsRes.data);
@@ -49,14 +54,26 @@ function AcquiredAssets() {
     }, []);
 
     const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
+    const toggleActiveOnly = () => setShowActiveOnly(!showActiveOnly);
+    const toggleSortOrder = () => setSortOrder(sortOrder === "asc" ? "desc" : "asc");
 
-    const handleRemoveAssignment = async ( id) => {
+    const filteredAssets = acquiredAssets
+        .filter(asset => !showActiveOnly || asset.is_active)
+        .sort((a, b) => {
+            const dateA = new Date(a.acquired_at);
+            const dateB = new Date(b.acquired_at);
+            return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+        });
+
+    const handleRemoveAcquisition = async ( id) => {
         try {
             const token = localStorage.getItem("access_token");
             await axios.patch(`http://localhost:8001/api/acquisitions/${id}/deactivate/`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setAcquiredAssets(acquiredAssets.filter(asset => asset.id !== id));
+            setAcquiredAssets(acquiredAssets.map(asset =>
+                asset.id === id ? { ...asset, is_active: false ,removed_at:new Date().toISOString() } : asset
+            ));
         } catch (error) {
             console.error("Errore durante la rimozione dell'acquisition:", error);
     }
@@ -64,42 +81,31 @@ function AcquiredAssets() {
     };
 
     const handleAddAcquisition = async (formData) => {
+        const { assignment, quantity, location } = formData;
+        // Rimuoviamo l'acquired_at, il backend lo imposta automaticamente
+        const dataToSend = {
+            assignment: assignment,
+            location: location,
+            quantity: parseInt(quantity, 10)
+
+        };
+
+        console.log("📤 DEBUG: Dati inviati:", dataToSend);
+
+
+        // 4. Prova a inviare l'acquisizione al backend
         try {
             const token = localStorage.getItem("access_token");
+            const headers = { Authorization: `Bearer ${token}` };
+            const response = await axios.post("http://localhost:8001/api/acquisitions/", dataToSend, { headers });
 
-            console.log("📤 DEBUG: Dati ricevuti dal modal:", formData);
-
-            const assignmentID = Number(formData.assignment);
-            const locationID = Number(formData.location);
-
-            if (isNaN(assignmentID) || isNaN(locationID)) {
-                console.error("❌ DEBUG: ID assegnazione o ID location non validi:", formData);
-                setError("Errore: ID non valido.");
-                return;
-            }
-
-            // 🔥 Cambiamo i nomi dei campi per allinearli al backend
-            const requestData = {
-                assignment: assignmentID,  // ✅ Modificato: prima era id_assignment
-                quantity: Number(formData.quantity),
-                location: locationID       // ✅ Modificato: prima era id_location
-            };
-
-            console.log("📤 DEBUG: RequestData finale da inviare:", JSON.stringify(requestData, null, 2));
-
-            // Esegui la richiesta POST
-            const response = await axios.post("http://localhost:8001/api/acquisitions/", requestData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            console.log("✅ DEBUG: Risposta ricevuta dal backend:", response.data);
-
-            // Aggiorna lo stato con la nuova acquisizione
-            setAcquiredAssets([...acquiredAssets, response.data]);
+            // Aggiorniamo lo stato acquisizioni in modo IMMEDIATO
+            setAcquiredAssets((prevAssets) => [...prevAssets, response.data]);
             setShowAddModal(false);
+            setError("");
         } catch (error) {
-            console.error("❌ DEBUG: Errore durante l'aggiunta dell'acquisizione:", error.response ? error.response.data : error);
-            setError("Errore durante l'aggiunta.");
+            console.error("Errore durante l'aggiunta dell'acquisizione:", error);
+            setError("Errore durante l'aggiunta dell'acquisizione.");
         }
     };
 
@@ -143,9 +149,6 @@ function AcquiredAssets() {
         }
     };
 
-
-
-
     return (
         <>
             <Navbar />
@@ -154,48 +157,61 @@ function AcquiredAssets() {
                 <div className="table-container">
                     <div className="table-header">
                         <h1>Acquired Assets</h1>
-                        <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Acquire New Asset</button>
+                        <div className="controls">
+                            <label className="checkbox-container">
+                                Mostra solo attivi
+                                <input type="checkbox" checked={showActiveOnly} onChange={toggleActiveOnly} />
+                                <span className="checkmark"></span>
+                            </label>
+                            <button className="sort-button" onClick={toggleSortOrder}>
+                                {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                                {sortOrder === "asc" ? " Ordina Crescente" : " Ordina Decrescente"}
+                            </button>
+                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Acquire New Asset</button>
+                        </div>
                     </div>
                     <table className="styled-table">
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Nome Asset</th>
+                            <th>Nome</th>
                             <th>Quantità Acquisita</th>
                             <th>Data Acquisizione</th>
+                            <th>Data Restituzione</th>
                             <th>Location</th>
+                            <th>Stato</th>
                             <th>Azioni</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {acquiredAssets.length > 0 ? acquiredAssets.map(asset => (
+                        {filteredAssets.length > 0 ? filteredAssets.map(asset => (
                             <tr key={asset.id}>
                                 <td>{asset.id}</td>
                                 <td>{asset.asset_name || 'N/A'}</td>
                                 <td>{asset.quantity}</td>
-                                <td>{new Date(asset.acquired_at).toLocaleString("it-IT", {
-                                    day: "2-digit",
-                                    month: "long",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit"
-                                })}</td>
-                                <td>{
-                                    locations.find(l => l.id === asset.location)?.name || "N/A"
-                                }</td>
+                                <td>{new Date(asset.acquired_at).toLocaleString("it-IT")}</td>
+                                <td>{asset.removed_at ? new Date(asset.removed_at).toLocaleString("it-IT") : "—"}</td>
+                                <td>{locations.find(l => l.id === asset.location)?.name || "N/A"}</td>
+                                <td className={asset.is_active ? "active" : "inactive"}>
+                                    {asset.is_active ? "Attivo" : "Disattivato"}
+                                </td>
                                 <td className="actions-column">
-                                    <div className="dropdown">
-                                        <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(asset.id)} />
-                                        {menuOpen === asset.id && (
-                                            <div className="dropdown-menu show">
-                                                <p onClick={() => handleEdit(asset)}>✏️ Modifica</p>
-                                                <p onClick={() => handleRemoveAssignment(asset.id)}>🗑️ Rimuovi</p>
-                                            </div>
-                                        )}
-                                    </div>
+                                    {asset.is_active ? (
+                                        <div className="dropdown">
+                                            <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(asset.id)} />
+                                            {menuOpen === asset.id && (
+                                                <div className="dropdown-menu show">
+                                                    <p onClick={() => handleEdit(asset)}>✏️ Modifica</p>
+                                                    <p onClick={() => handleRemoveAcquisition(asset.id)}>🗑️ Rimuovi</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <p className="disabled">🚫 Già disattivato</p>
+                                    )}
                                 </td>
                             </tr>
-                        )) : <tr><td colSpan="5">Nessun asset acquisito trovato</td></tr>}
+                        )) : <tr><td colSpan="7">Nessun asset acquisito trovato</td></tr>}
                         </tbody>
                     </table>
                 </div>

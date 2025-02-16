@@ -46,8 +46,9 @@ class Location(models.Model):
 class Assignment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="assignments")
     asset = models.ForeignKey("Asset", on_delete=models.CASCADE, related_name="assignments")
-    assigned_at = models.DateTimeField(default=now)
+    assigned_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    removed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.asset.name} ({'Attiva' if self.is_active else 'Non attiva'})"
@@ -60,6 +61,7 @@ class Acquisition(models.Model):
     acquired_at = models.DateTimeField(default=now)
     is_active = models.BooleanField(default=True)  # Indica se l'asset è ancora in uso
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, related_name="acquisitions")
+    removed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.quantity} x {self.assignment.asset.name} - {self.assignment.user.username} @ {self.location.name if self.location else 'N/A'}"

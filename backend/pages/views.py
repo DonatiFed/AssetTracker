@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.decorators import api_view, permission_classes,action
 from django.db.models import Sum,Exists,OuterRef,Prefetch
+from django.utils.timezone import now
 
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
@@ -124,6 +125,7 @@ class AssignmentViewSet(viewsets.ModelViewSet):
     def deactivate(self, request, pk=None):
         assignment = self.get_object()
         assignment.is_active = False
+        assignment.removed_at = now()
         assignment.save()
         return Response(AssignmentSerializer(assignment).data)
 
@@ -140,12 +142,11 @@ class AcquisitionViewSet(viewsets.ModelViewSet):
         if self.request.user.is_manager():
             return Acquisition.objects.select_related('assignment__asset')
         return Acquisition.objects.select_related('assignment__asset').filter(
-            assignment__user=self.request.user,
-            is_active=True
+            assignment__user=self.request.user
         )
 
     def create(self, request, *args, **kwargs):
-        """Gestisce la creazione dell'acquisizione."""
+        """Gestisce la creazione dell'acquisizione, delegando tutti i controlli al serializer."""
         print("✅ Richiesta ricevuta: CREAZIONE ACQUISIZIONE")  # DEBUG
 
         serializer = self.get_serializer(data=request.data)
@@ -153,27 +154,13 @@ class AcquisitionViewSet(viewsets.ModelViewSet):
             print("❌ ERRORE: Dati non validi", serializer.errors)  # DEBUG
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        assignment = serializer.validated_data['assignment']
-
-        # Controllo che l'utente sia assegnatario dell'asset
-        if not request.user.is_manager():  # Se NON è un manager, facciamo i controlli
-            if assignment.user != request.user:
-                print("❌ ERRORE: Utente non autorizzato")  # DEBUG
-                return Response({"error": "Non puoi acquisire asset non assegnati a te."},
-                                status=status.HTTP_403_FORBIDDEN)
-
-        # Controllo che non esista già un'acquisizione attiva
-        if Acquisition.objects.filter(assignment=assignment, is_active=True).exists():
-            print("❌ ERRORE: Acquisizione già esistente")  # DEBUG
-            return Response({"error": "Hai già un'acquisizione attiva per questo asset."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        print("✅ Nessun errore. Creazione acquisizione...")  # DEBUG
         acquisition = serializer.save()
-        acquisition.save()
+        serializer.save()
         print(f"✅ Acquisizione salvata! ID: {acquisition.id}")  # DEBUG
 
+
         return Response(AcquisitionSerializer(acquisition).data, status=status.HTTP_201_CREATED)
+
 
     def update(self, request, *args, **kwargs):
         """Permette la modifica solo della quantità per acquisizioni proprie attive."""
@@ -195,18 +182,16 @@ class AcquisitionViewSet(viewsets.ModelViewSet):
             return Response({"error": "La quantità deve essere un numero intero valido."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Verifica che la quantità sia disponibile
-        assigned_quantity = instance.assignment.asset.total_quantity
-        acquired_total = Acquisition.objects.filter(
-            assignment=instance.assignment, is_active=True
-        ).exclude(id=instance.id).aggregate(total_acquired=Sum('quantity'))['total_acquired'] or 0
+        # Calcola la quantità disponibile usando AssetSerializer
+        asset_serializer = AssetSerializer(instance.assignment.asset)
+        available_quantity = asset_serializer.get_available_quantity(instance.assignment.asset)
 
-        max_available = assigned_quantity - acquired_total
-        if new_quantity > max_available:
-            return Response({"error": f"Quantità non disponibile. Massimo disponibile: {max_available}."},
+        # Considera l'acquisizione corrente, sottraendo la vecchia quantità
+        if new_quantity > available_quantity + instance.quantity:
+            return Response({
+                                "error": f"Quantità non disponibile. Massimo disponibile: {available_quantity + instance.quantity}."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Aggiorna solo il campo quantità
         instance.quantity = new_quantity
         instance.save()
 
@@ -217,6 +202,7 @@ class AcquisitionViewSet(viewsets.ModelViewSet):
         """Permette di disattivare un'acquisizione."""
         acquisition = self.get_object()
         acquisition.is_active = False
+        acquisition.removed_at = now()
         acquisition.save()
         return Response(AcquisitionSerializer(acquisition).data)
 

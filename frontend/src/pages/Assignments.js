@@ -14,11 +14,14 @@ function Assignments() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [selectedAssignment, setSelectedAssignment] = useState(null);
+    const [showActiveOnly, setShowActiveOnly] = useState(false);
+    const [sortOrder, setSortOrder] = useState("asc");
 
     const [newAssignment, setNewAssignment] = useState({
         user: "",
         asset: "",
         assigned_quantity: 1,
+        assigned_at: new Date().toISOString(),
     });
 
     const menuRefs = useRef({});
@@ -39,6 +42,7 @@ function Assignments() {
                 setAssignments(assignmentsRes.data);
                 setUsers(usersRes.data);
                 setAssets(assetsRes.data);
+
             } catch (error) {
                 console.error("Errore nel recupero dei dati:", error);
                 setError("Errore nel caricamento dati.");
@@ -71,11 +75,15 @@ function Assignments() {
                 setIsLoading(false);
                 return;
             }
-
+            const newAssignmentData = {
+                ...formData,
+                assigned_at: new Date().toISOString()  // Invia la data corrente
+            };
+            console.log("Dati inviati:", newAssignmentData);
             // POST all'API
             const response = await axios.post(
                 "http://localhost:8001/api/assignments/",
-                formData,
+                newAssignmentData,
                 { headers }
             );
 
@@ -107,7 +115,7 @@ function Assignments() {
             // Aggiorna lo stato locale
             setAssignments(
                 assignments.map((a) =>
-                    a.id === response.data.id ? { ...a, is_active: false } : a
+                    a.id === response.data.id ? { ...a, is_active: false ,removed_at:new Date().toISOString() } : a
                 )
             );
         } catch (error) {
@@ -116,15 +124,43 @@ function Assignments() {
         }
     };
 
+    const filteredAssignments = assignments
+        .filter((a) => !showActiveOnly || a.is_active)
+        .sort((a, b) => sortOrder === "asc" ? new Date(a.created_at) - new Date(b.created_at) : new Date(b.created_at) - new Date(a.created_at));
+    const handleSort = () => {
+        const order = sortOrder === "asc" ? "desc" : "asc";
+        setSortOrder(order);
+
+        const sortedAssignments = [...assignments].sort((a, b) => {
+            const dateA = new Date(a.assigned_at);
+            const dateB = new Date(b.assigned_at);
+
+            if (order === "asc") {
+                return dateA - dateB;
+            } else {
+                return dateB - dateA;
+            }
+        });
+
+        setAssignments(sortedAssignments);
+    };
+
     return (
         <>
             <Navbar />
             <div className="table-container">
                 <div className="table-header">
                     <h1>Gestione Assegnazioni</h1>
-                    <button className="add-button" onClick={() => setShowAddModal(true)}>
-                        ➕ Assegna Asset
-                    </button>
+                    <div className="controls">
+                        <label className="checkbox-label">
+                            <input type="checkbox" checked={showActiveOnly} onChange={() => setShowActiveOnly(!showActiveOnly)} />
+                            Mostra solo attivi
+                        </label>
+                        <button className="sort-button" onClick={handleSort}>
+                            {sortOrder === "asc" ? "⬇️ Ordina Decrescente" : "⬆️ Ordina Crescente"}
+                        </button>
+                        <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Assegna Asset</button>
+                    </div>
                 </div>
                 {error && <p className="error-message">{error}</p>}
                 <table className="styled-table">
@@ -134,39 +170,43 @@ function Assignments() {
                         <th>Nome Utente</th>
                         <th>ID Asset</th>
                         <th>Nome Asset</th>
+                        <th>Data di assegnazione</th>
+                        <th>Data di disattivazione</th>
                         <th>Stato</th>
                         <th>Azioni</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {assignments.map((assignment) => (
+                    {filteredAssignments.map((assignment) => (
                         <tr key={assignment.id}>
                             <td>{assignment.user}</td>
                             <td>{assignment.user_name}</td>
                             <td>{assignment.asset}</td>
                             <td>{assignment.asset_name}</td>
+                            <td>{assignment.assigned_at ? new Date(assignment.assigned_at).toLocaleDateString('it-IT', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) : "N/A"}</td>
+                            <td>{assignment.removed_at ? new Date(assignment.removed_at).toLocaleDateString('it-IT', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) : "N/A"}</td>
                             <td className={assignment.is_active ? "active" : "inactive"}>
                                 {assignment.is_active ? "Attivo" : "Disattivato"}
                             </td>
                             <td className="actions-column">
-                                <div
-                                    className="dropdown"
-                                    ref={(el) => (menuRefs.current[assignment.id] = el)}
-                                >
-                                    <BsThreeDotsVertical
-                                        className="menu-icon"
-                                        onClick={() => toggleMenu(assignment.id)}
-                                    />
+                                <div className="dropdown" ref={(el) => (menuRefs.current[assignment.id] = el)}>
+                                    <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(assignment.id)} />
                                     {menuOpen === assignment.id && (
                                         <div className="dropdown-menu show">
                                             {assignment.is_active ? (
-                                                <p
-                                                    onClick={() =>
-                                                        handleRemoveAssignment(assignment.id)
-                                                    }
-                                                >
-                                                    🛑 Disattiva
-                                                </p>
+                                                <p onClick={() => handleRemoveAssignment(assignment.id)}>🛑 Disattiva</p>
                                             ) : (
                                                 <p className="disabled">🚫 Già disattivato</p>
                                             )}
@@ -202,6 +242,11 @@ function Assignments() {
                             value: asset.id,
                             label: asset.name
                         }))
+                    },
+                    {
+                        name: "assigned_at",
+                        type: "hidden",
+                        value: new Date().toISOString()  // Data attuale
                     }
                 ]}
             />

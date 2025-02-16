@@ -138,13 +138,7 @@ function Assets() {
                                 <td>{asset.description}</td>
                                 <td>{asset.total_quantity}</td>
                                 <td>{asset.available_quantity}</td>
-                                {role === "manager" && <td>{new Date(asset.created_at).toLocaleString("it-IT", {
-                                    day: "2-digit",
-                                    month: "long",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit"
-                                })}</td>}
+                                {role === "manager" && <td>{asset.removed_at ? new Date(asset.removed_at).toLocaleString("it-IT") : "—"}</td>}
                                 {role === "manager" && (
                                     <td className="actions-column">
                                         <div className="dropdown" ref={(el) => (menuRefs.current[asset.id] = el)}>

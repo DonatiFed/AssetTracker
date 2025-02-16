@@ -68,10 +68,11 @@ class LocationSerializer(serializers.ModelSerializer):
 class AssignmentSerializer(serializers.ModelSerializer):
     user_name = serializers.ReadOnlyField(source="user.username")
     asset_name = serializers.ReadOnlyField(source="asset.name")
+    assigned_at = serializers.DateTimeField(required=False, allow_null=True)
 
     class Meta:
         model = Assignment
-        fields = ["id", "user", "user_name", "asset", "asset_name", "is_active", "assigned_at"]
+        fields = ["id", "user", "user_name", "asset", "asset_name", "is_active", "assigned_at","removed_at"]
 
     def validate(self, data):
         """ Impedisce più assignment attivi per la stessa coppia user-asset. """
@@ -93,33 +94,35 @@ class AcquisitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Acquisition
-        fields = ['id', 'assignment', 'asset_name', 'user_name', 'quantity', 'acquired_at', 'is_active', 'location']
-
-    def create(self, validated_data):
-        print("Creazione acquisizione con dati:", validated_data)  # DEBUG
-        acquisition = Acquisition.objects.create(**validated_data)
-        acquisition.save()  # FORZA IL SALVATAGGIO
-        return acquisition
+        fields = ['id', 'assignment', 'asset_name', 'user_name', 'quantity', 'acquired_at', 'is_active', 'location','removed_at']
 
     def validate(self, data):
-        """ Impedisce più acquisition attive per lo stesso assignment e controlla la quantità disponibile."""
+        """ Controlla la validità dell'acquisizione con LOG per debugging. """
+        request = self.context.get('request')  # Otteniamo l'utente dalla richiesta
         assignment = data['assignment']
         quantity = data['quantity']
+        # Usa il metodo get_available_quantity di AssetSerializer
+        asset_serializer = AssetSerializer(assignment.asset)
+        available = asset_serializer.get_available_quantity(assignment.asset)
 
-        if Acquisition.objects.filter(
-            assignment=assignment,
-            is_active=True
-        ).exclude(id=self.instance.id if self.instance else None).exists():
-            raise serializers.ValidationError("Esiste già un'acquisition attiva per questo assignment.")
+        print(f"🔍 DEBUG: Validazione acquisizione per l'utente {request.user.username}")
+        print(f"🔍 DEBUG: Asset assegnato a {assignment.user.username} - Asset: {assignment.asset.name}, Quantità richiesta: {quantity}")
 
-        acquired_total = Acquisition.objects.filter(
-            assignment=assignment, is_active=True
-        ).aggregate(total_acquired=Sum('quantity'))['total_acquired'] or 0
+        # 🔹 Se l'utente NON è un manager, può acquisire solo asset assegnati a lui
+        if not request.user.is_manager and assignment.user != request.user:
+            print(f"❌ ERRORE: {request.user.username} sta cercando di acquisire un asset non assegnato a lui!")
+            raise serializers.ValidationError("Non puoi acquisire asset non assegnati a te.")
 
-        available = assignment.asset.total_quantity - acquired_total
+        # 🔹 Un utente non può avere più acquisizioni attive per lo stesso asset
+        if Acquisition.objects.filter(assignment__user=assignment.user, assignment__asset=assignment.asset, is_active=True).exists():
+            print(f"❌ ERRORE: {assignment.user.username} ha già un'acquisizione attiva per {assignment.asset.name}!")
+            raise serializers.ValidationError("Hai già un'acquisizione attiva per questo asset.")
+
+        # 🔹 Controllo la disponibilità degli asset rispetto a tutte le acquisizioni attive
         if quantity > available:
             raise serializers.ValidationError(f"Quantità non disponibile. Massimo disponibile: {available}.")
 
+        print("✅ DEBUG: Acquisizione valida, procedo con il salvataggio.")
         return data
 
 
