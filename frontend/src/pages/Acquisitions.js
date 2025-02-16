@@ -172,7 +172,7 @@ function Acquisitions() {
                                 Mostra solo attivi
                             </label>
                             <button className="sort-button" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                                Ordina per data {sortOrder === "asc" ? "⬆️" : "⬇️"}
+                                 {sortOrder === "asc" ? "⬇️ Ordina Decrescente" : "⬆️ Ordina Crescente"}
                             </button>
                         </div>
                         <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Acquisizione</button>

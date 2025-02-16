@@ -3,10 +3,11 @@ body {
     padding-top: 100px;
     font-family: "Arial", sans-serif;
     background: linear-gradient(135deg, #8B0000, #4B0000);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    min-height: 100vh;         /* Altezza minima per permettere lo scroll */
+    display: flex;             /* Mantiene l'allineamento centrale */
+    flex-direction: column;    /* Elementi impilati verticalmente */
+    justify-content: flex-start; /* Evita che si centri verticalmente */
+    align-items: center;       /* Mantiene la centratura orizzontale */
     margin: 0;
 }
 
@@ -102,17 +103,15 @@ body {
 
 /* TABELLA */
 .table-container {
-    min-height: calc(100vh - 150px); /* Assicura che tutte le pagine abbiano la stessa altezza */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start; /* Evita che la tabella si allarghi troppo */
-    align-items: center;
+    overflow: auto;           /* Scroll interno */
+    max-height: calc(100vh - 150px);
     width: 90%;
-    margin: 120px auto 40px;
+    margin: 120px auto 40px;  /* Mantiene il margine */
     background: white;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    flex: 1;                  /* Si adatta allo spazio disponibile */
 }
 
 .styled-table {
@@ -332,7 +331,7 @@ body {
 /* 🔹 USER INFO: Sempre accanto alla navbar, senza sovrapporsi */
 .user-info-container {
     position: absolute;
-    top: 90px; /* Abbassato per allinearsi alla navbar */
+    top: 180px; /* Abbassato per allinearsi alla navbar */
     right: 20px;
     background: rgba(255, 255, 255, 0.1);
     padding: 12px 20px;

@@ -218,12 +218,27 @@ class ReportViewSet(viewsets.ModelViewSet):
             return Report.objects.all()
         return Report.objects.filter(acquisition__assignment__user=self.request.user)
 
-    def create(self, serializer):
-        """Permettiamo solo agli utenti di creare report per le proprie acquisizioni."""
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data['created_at'] = now()  # Aggiunge la data di creazione
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
         acquisition = serializer.validated_data['acquisition']
-        if acquisition.assignment.user != self.request.user:
+
+        # Controllo se l'utente ha diritto
+        if not request.user.is_manager and acquisition.assignment.user != request.user:
             return Response({"error": "Non puoi creare un report per un'acquisizione che non è tua."}, status=403)
-        serializer.save()
+
+        # Controllo se esiste già un report per questa acquisition
+        if Report.objects.filter(acquisition=acquisition).exists():
+            return Response({"error": "Esiste già un report per questa acquisizione."}, status=400)
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 
 

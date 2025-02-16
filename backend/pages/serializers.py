@@ -128,7 +128,7 @@ class AcquisitionSerializer(serializers.ModelSerializer):
 
 # Serializer per i report generati dagli utenti
 class ReportSerializer(serializers.ModelSerializer):
-    acquisition = AcquisitionSerializer(read_only=True)  # Mostra i dettagli dell'acquisizione
+    acquisition = serializers.PrimaryKeyRelatedField(queryset=Acquisition.objects.all())  # Accetta l'ID
 
     class Meta:
         model = Report

@@ -4,6 +4,7 @@ import "../style.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import axios from "axios";
 import AddItemModal from "../components/AddItemModal";
+import UserInfo from "../components/UserInfo";
 
 function Assignments() {
     const [assignments, setAssignments] = useState([]);
@@ -149,6 +150,7 @@ function Assignments() {
         <>
             <Navbar />
             <div className="table-container">
+                <UserInfo />
                 <div className="table-header">
                     <h1>Gestione Assegnazioni</h1>
                     <div className="controls">
