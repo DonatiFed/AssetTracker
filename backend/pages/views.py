@@ -14,6 +14,8 @@ from .serializers import (
 )
 from django.contrib.auth import get_user_model
 from .permissions import IsManager, IsOwnerOrManager
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 
 
@@ -54,18 +56,42 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]  # ⬅ Rimuove il requisito di autenticazione
 
     def create(self, request, *args, **kwargs):
-        """Gestisce la registrazione e restituisce un messaggio di successo"""
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+
+            # Genera un token JWT per l'utente registrato
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "access": str(refresh.access_token),  # Token di accesso
+                "refresh": str(refresh) , # Token di refresh
+                "role": user.role
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ✅ Viewset per la gestione utenti
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsManager]  # Solo i manager possono vedere e modificare utenti
+
+    def get_permissions(self):
+        if self.request.user.is_manager():
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
+
+    def create(self, serializer):
+        if not self.request.user.is_manager():
+            return Response({"error": "Non hai i permessi per creare un utente"}, status=403)
+        serializer.save()
+
+    def update(self, serializer):
+        if not self.request.user.is_manager():
+            return Response({"error": "Non hai i permessi per modificare questo utente"}, status=403)
+        serializer.save()
 
 
 class AssetViewSet(viewsets.ModelViewSet):
@@ -94,10 +120,14 @@ class AssetViewSet(viewsets.ModelViewSet):
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [permissions.IsAuthenticated()]  # Permettiamo a tutti di aggiungere location
+            if self.request.user.is_authenticated and self.request.user.is_manager():
+                return [permissions.IsAuthenticated()]
+            else:
+                self.permission_denied(self.request, message="Solo i manager possono modificare le location.")
         return [permissions.IsAuthenticated()]
 
 
@@ -211,6 +241,7 @@ class AcquisitionViewSet(viewsets.ModelViewSet):
 class ReportViewSet(viewsets.ModelViewSet):
     queryset = Report.objects.none()
     serializer_class = ReportSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """Gli user vedono solo i loro report, i manager vedono tutti i report."""

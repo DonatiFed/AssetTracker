@@ -19,23 +19,34 @@ function Reports() {
     const [selectedReport, setSelectedReport] = useState(null);
     const [sortOrder, setSortOrder] = useState("asc");
     const [error, setError] = useState("");
+    const userRole = localStorage.getItem("user_role");
+    const userId = localStorage.getItem("user_id");
+    console.log("User_id: ", userId);
+
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
                 const headers = { Authorization: `Bearer ${token}` };
-                const [acqRes, userRes, reportRes, assignmentRes] = await Promise.all([
+
+                const requests=[
                     axios.get("http://localhost:8001/api/acquisitions/", { headers }),
-                    axios.get("http://localhost:8001/api/users/", { headers }),
                     axios.get("http://localhost:8001/api/reports/", { headers }),
                     axios.get("http://localhost:8001/api/assignments/", { headers })
-                ]);
+                ];
+                if (userRole === 'manager') {
+                    requests.push(axios.get("http://localhost:8001/api/users/", { headers }));
+                }
+                const [acqRes, reportRes, assignmentRes, userRes] = await Promise.all(requests);
 
                 setAcquisitions(acqRes.data);
-                setUsers(userRes.data);
                 setReports(reportRes.data);
-                setAssignments(assignmentRes.data.filter(a => a.is_active));
+                setAssignments(assignmentRes.data);
+
+                if (userRole === 'manager') {
+                    setUsers(userRes.data);
+                }
             } catch (error) {
                 console.error("Errore nel recupero dei dati:", error);
             }
@@ -52,49 +63,50 @@ function Reports() {
         return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
-    const uniqueAssets = Array.from(new Set(acquisitions.map(a => a.asset_name))).map((asset, index) => {
-        const acquisition = acquisitions.find(a => a.asset_name === asset);
-        return { key: `asset-${acquisition?.id || index}`, value: acquisition?.id, label: asset };
-    });
+    // Mostra asset univoci dagli assignment attivi (limitato allo user corrente se non manager)
+    const visibleAssignments = assignments;
+    const uniqueAssets = Array.from(new Set(visibleAssignments.map(a => a.asset_name)))
+        .map((asset, index) => {
+            const assignment = visibleAssignments.find(a => a.asset_name === asset);
+            return { key: `asset-${assignment?.id || index}`, value: assignment?.id, label: asset };
+        });
 
     const handleAddReport = async (formData) => {
-        const { user, asset, title, description } = formData;
+        const { asset, title, description } = formData;
+        const selectedUser = userRole === "manager" ? formData.user : userId;
         console.log("📝 Dati dal modal:", formData);
 
-        // Trova l'acquisition selezionata (solo per recuperare l'asset)
-        const selectedAcquisition = acquisitions.find(acq => acq.id === parseInt(asset));
-        if (!selectedAcquisition) {
-            console.error("❌ Acquisition non trovata.");
-            setError("Errore: Nessuna acquisition trovata.");
-            return;
-        }
-        console.log("🔍 Acquisition selezionata per recupero asset:", selectedAcquisition);
-
-        // Usa assignments per recuperare l'ID asset corretto
-        const assignmentForAsset = assignments.find(a => a.id === selectedAcquisition.assignment);
-        console.log("AssignmentForAsset:",assignmentForAsset);
-        if (!assignmentForAsset) {
+        // Trova l'assignment selezionato per risalire all'asset e allo user
+        const selectedAssignment = assignments.find(a => a.id === parseInt(asset));
+        if (!selectedAssignment) {
             console.error("❌ Assignment non trovato.");
             setError("Errore: Nessun assignment trovato.");
             return;
         }
+        console.log("🔍 Assignment selezionato:", selectedAssignment);
 
-        const assetId = assignmentForAsset.asset;  // Recupera l'ID asset da assignments(l'assignment da cui si recupera potrebbe non essere quello legato allo user che fa report(e ha acquistato)!!!)
+        const assetId = selectedAssignment.asset;  // Recupera l'ID asset
 
-        console.log("🔍 Asset trovato tramite assignment:", assetId);
+        let assignmentForUser;
 
-        const assignmentForAcquisition = assignments.find(a =>
-            a.user === parseInt(user) && a.asset === assetId
-        );
+        if (userRole === "user") {
+            assignmentForUser = selectedAssignment;  // Usa direttamente l'assignment selezionato
+            console.log("🛠️ Assignment scelto per user:", assignmentForUser);
+        } else {
+            assignmentForUser = assignments.find(a =>
+                a.user === parseInt(selectedUser) && a.asset === assetId && a.is_active
+            );
+            console.log("🔍 Assignment attivo per l'utente e l'asset selezionati:", assignmentForUser);
+        }
 
-        if (!assignmentForAcquisition) {
-            console.error("❌ Nessun assignment trovato per l'utente e l'asset selezionati.");
-            setError("Errore: Nessun assignment trovato.");
+        if (!assignmentForUser) {
+            console.error("❌ Nessun assignment attivo trovato per l'utente e l'asset selezionati.");
+            setError("Errore: Nessun assignment attivo trovato.");
             return;
         }
 
         const acquisition = acquisitions.find(acq =>
-            acq.is_active && acq.assignment === assignmentForAcquisition.id
+            acq.is_active && acq.assignment === assignmentForUser.id
         );
 
         if (!acquisition) {
@@ -124,14 +136,17 @@ function Reports() {
     const handleEditReport = async (formData) => {
         if (!selectedReport) return;
         const { title, description } = formData;
+        const dataToSend = { title, description, acquisition: selectedReport.acquisition };
+        console.log("📤 Dati inviati al backend per modifica:", dataToSend);
+
         try {
             const token = localStorage.getItem("access_token");
             const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.put(`http://localhost:8001/api/reports/${selectedReport.id}/`, { title, description }, { headers });
+            const response = await axios.put(`http://localhost:8001/api/reports/${selectedReport.id}/`, dataToSend, { headers });
             setReports(reports.map(r => (r.id === selectedReport.id ? response.data : r)));
             setShowEditModal(false);
         } catch (error) {
-            console.error("Errore durante la modifica del report:", error);
+            console.error("Errore durante la modifica del report:", error.response ? error.response.data : error);
             setError("Errore durante la modifica.");
         }
     };
@@ -159,7 +174,7 @@ function Reports() {
                         <div className="controls">
                             <button className="sort-button" onClick={toggleSortOrder}>
                                 {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
-                                {sortOrder === "asc" ? " Ordina Crescente" : " Ordina Decrescente"}
+                                {sortOrder === "asc" ? " Data Creazione Crescente" : " Data Creazione  Decrescente"}
                             </button>
                             <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Report</button>
                         </div>
@@ -214,7 +229,7 @@ function Reports() {
                     handleClose={() => setShowAddModal(false)}
                     handleSave={handleAddReport}
                     fields={[
-                        { name: "user", label: "Utente", type: "select", options: users.map(u => ({ value: u.id, label: u.username })) },
+                        ...(userRole === 'manager' ? [{ name: "user", label: "Utente", type: "select", options: users.map(u => ({ value: u.id, label: u.username })) }] : []),
                         {
                             name: "asset",
                             label: "Asset",

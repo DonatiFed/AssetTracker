@@ -9,7 +9,6 @@ import Locations from "./pages/Locations";
 import Reports from "./pages/Reports";
 import AcquiredAssets from "./pages/AcquiredAssets";
 import Acquisitions from "./pages/Acquisitions";
-import History from "./pages/History";
 import Users from "./pages/Users";
 import Profile from "./pages/Profile";
 import Assignments from "./pages/Assignments";
@@ -23,14 +22,21 @@ function App() {
 
     useEffect(() => {
         const token = localStorage.getItem("access_token");
+        console.log("🔍 Controllo iniziale token:", token);
         setIsLoggedIn(!!token); // Aggiorna lo stato in base al token
     }, []);
+    useEffect(() => {
+        console.log("🧩 Stato aggiornato: isLoggedIn =", isLoggedIn);
+    }, [isLoggedIn]);
 
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+                <Route path="/login" element={<Login onLogin={() => {
+                    console.log("🔓 Login effettuato, aggiornamento stato...");
+                    setIsLoggedIn(true);
+                }} />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/home" element={isLoggedIn ? <Home /> : <Navigate to="/" />} />
                 <Route path="/assets" element={isLoggedIn ? <Assets /> : <Navigate to="/" />} />
@@ -42,6 +48,7 @@ function App() {
                 <Route path="/history" element={isLoggedIn ? <History /> : <Navigate to="/" />} />
                 <Route path="/users" element={isLoggedIn ? <Users /> : <Navigate to="/" />} />
                 <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/" />} />
+
             </Routes>
         </Router>
     );

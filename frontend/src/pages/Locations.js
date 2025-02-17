@@ -1,39 +1,85 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import AddItemModal from "../components/AddItemModal";
+import EditItemModal from "../components/EditItemModal";
 import UserInfo from "../components/UserInfo";
 import "../style.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
-
-// Mock data per le location
-const mockLocations = [
-    { id: 1, name: "Sede Centrale", address: "Via Roma 10, Milano", description: "Sede principale dell'azienda" },
-    { id: 2, name: "Filiale Torino", address: "Corso Duca 15, Torino", description: "Filiale per il nord-ovest" },
-    { id: 3, name: "Ufficio Roma", address: "Piazza Venezia 5, Roma", description: "Ufficio operativo per il centro Italia" }
-];
+import axios from "axios";
 
 function Locations() {
-    const [locations, setLocations] = useState(mockLocations);
+    const [locations, setLocations] = useState([]);
     const [menuOpen, setMenuOpen] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedLocation, setSelectedLocation] = useState(null);
     const [role, setRole] = useState(null);
-    const menuRefs = useRef({});
 
     useEffect(() => {
-        // Recupero ruolo utente
-        const fetchUserRole = async () => {
-            const storedRole = localStorage.getItem("user_role");
-            setRole(storedRole);
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem("access_token");
+                const headers = { Authorization: `Bearer ${token}` };
+                const userRole = localStorage.getItem("user_role");
+                setRole(userRole);
+
+                const response = await axios.get("http://localhost:8001/api/locations/", { headers });
+                setLocations(response.data);
+            } catch (error) {
+                console.error("Errore nel recupero delle locations:", error);
+            }
         };
-        fetchUserRole();
+        fetchData();
     }, []);
 
-    const toggleMenu = (id) => {
-        setMenuOpen(menuOpen === id ? null : id);
+    const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
+
+    const handleAddLocation = async (data) => {
+        try {
+            const token = localStorage.getItem("access_token");
+            const headers = { Authorization: `Bearer ${token}` };
+            const response = await axios.post("http://localhost:8001/api/locations/", data, { headers });
+            setLocations([...locations, response.data]);
+            setShowAddModal(false);
+        } catch (error) {
+            console.error("Errore durante l'aggiunta della location:", error);
+        }
     };
 
-    const handleAction = (action, id) => {
-        alert(`Hai selezionato "${action}" per la location con ID ${id}`);
-        setMenuOpen(null);
+    const handleEditLocation = async (id, data) => {
+        console.log("🛠 Dati ricevuti per modifica:", data);
+        const formattedData = {
+            name: data.name,
+            address: data.address,
+            description: data.description,
+        };
+        try {
+            const token = localStorage.getItem("access_token");
+            const headers = { Authorization: `Bearer ${token}` };
+            const response = await axios.put(`http://localhost:8001/api/locations/${id}/`, formattedData, { headers });
+            setLocations(locations.map(loc => (loc.id === id ? response.data : loc)));
+            setShowEditModal(false);
+        } catch (error) {
+            console.error("Errore durante la modifica della location:", error.response ? error.response.data : error);
+        }
+    };
+    const handleRemoveLocation = async (id) => {
+        try {
+            const token = localStorage.getItem("access_token");
+            const headers = { Authorization: `Bearer ${token}` };
+            await axios.delete(`http://localhost:8001/api/locations/${id}/`, { headers });
+            setLocations(locations.filter(loc => loc.id !== id));
+        } catch (error) {
+            console.error("Errore durante la rimozione della location:", error);
+        }
+    };
+    const handleSubmit = () => {
+        const updatedData = {};
+        fields.forEach((field) => {
+            updatedData[field.name] = formData[field.name];
+        });
+        console.log("📨 Dati inviati da EditItemModal:", updatedData);
+        handleSave(itemId, updatedData); // Assicurati che l'id e i dati siano passati
     };
 
     return (
@@ -41,15 +87,13 @@ function Locations() {
             <Navbar />
             <div className="content-container">
                 <UserInfo />
-
                 <div className="table-container">
                     <div className="table-header">
                         <h1>Gestione Locations</h1>
                         {role === "manager" && (
-                            <button className="add-button" onClick={() => setShowModal(true)}>➕ Aggiungi Location</button>
+                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Location</button>
                         )}
                     </div>
-
                     <table className="styled-table">
                         <thead>
                         <tr>
@@ -69,15 +113,13 @@ function Locations() {
                                 <td>{location.description}</td>
                                 {role === "manager" && (
                                     <td className="actions-column">
-                                        <div className="dropdown" ref={(el) => (menuRefs.current[location.id] = el)}>
-                                            <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(location.id)} />
-                                            {menuOpen === location.id && (
-                                                <div className="dropdown-menu show">
-                                                    <p onClick={() => handleAction("Modifica", location.id)}>✏️ Modifica</p>
-                                                    <p onClick={() => handleAction("Rimuovi", location.id)}>🗑️ Rimuovi</p>
-                                                </div>
-                                            )}
-                                        </div>
+                                        <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(location.id)} />
+                                        {menuOpen === location.id && (
+                                            <div className="dropdown-menu show">
+                                                <p onClick={() => { setSelectedLocation(location); setShowEditModal(true); }}>✏️ Modifica</p>
+                                                <p onClick={() => handleRemoveLocation(location.id)}>🗑️ Rimuovi</p>
+                                            </div>
+                                        )}
                                     </td>
                                 )}
                             </tr>
@@ -86,6 +128,32 @@ function Locations() {
                     </table>
                 </div>
             </div>
+            {showAddModal && role === "manager" && (
+                <AddItemModal
+                    show={showAddModal}
+                    handleClose={() => setShowAddModal(false)}
+                    handleSave={handleAddLocation}
+                    fields={[
+                        { name: "name", label: "Nome", type: "text" },
+                        { name: "address", label: "Indirizzo", type: "text" },
+                        { name: "description", label: "Descrizione", type: "textarea" }
+                    ]}
+                />
+            )}
+
+            {showEditModal && (
+                <EditItemModal
+                    show={showEditModal}
+                    handleClose={() => setShowEditModal(false)}
+                    handleSave={(data) => handleEditLocation(selectedLocation.id, data)}  // Corretto qui
+                    initialData={selectedLocation}
+                    fields={[
+                        { name: "name", label: "Nome", type: "text" },
+                        { name: "address", label: "Indirizzo", type: "text" },
+                        { name: "description", label: "Descrizione", type: "textarea" }
+                    ]}
+                />
+            )}
         </>
     );
 }

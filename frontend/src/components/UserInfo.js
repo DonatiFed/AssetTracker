@@ -12,6 +12,7 @@ function UserInfo() {
                 const token = localStorage.getItem("access_token");
                 if (!token) {
                     setError("Nessun token trovato, accedi di nuovo.");
+                    setShowModal(true);  // Mostra il modal
                     return;
                 }
 

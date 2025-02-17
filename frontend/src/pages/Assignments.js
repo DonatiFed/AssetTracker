@@ -5,6 +5,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import axios from "axios";
 import AddItemModal from "../components/AddItemModal";
 import UserInfo from "../components/UserInfo";
+import {FaSortAmountDown, FaSortAmountUp} from "react-icons/fa";
 
 function Assignments() {
     const [assignments, setAssignments] = useState([]);
@@ -159,7 +160,8 @@ function Assignments() {
                             Mostra solo attivi
                         </label>
                         <button className="sort-button" onClick={handleSort}>
-                            {sortOrder === "asc" ? "⬇️ Ordina Decrescente" : "⬆️ Ordina Crescente"}
+                            {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                            {sortOrder === "asc" ? " Data Assegnazione Crescente" : " Data Assegnazione Decrescente"}
                         </button>
                         <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Assegna Asset</button>
                     </div>

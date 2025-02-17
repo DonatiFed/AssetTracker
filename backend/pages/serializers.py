@@ -2,14 +2,16 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Asset, Location, Assignment, Acquisition, Report,CustomUser
 from django.db.models import Sum
+from django.contrib.auth.models import User
 # Recupera il modello CustomUser
 
 User = get_user_model()
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(source='phone_number')  # Aggiungi il campo phone
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone','role']
 
 # Serializer per la registrazione degli utenti
 class RegisterSerializer(serializers.ModelSerializer):
@@ -26,8 +28,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             first_name=validated_data.get('first_name', ''),  # Default vuoto se non fornito
             last_name=validated_data.get('last_name', ''),
-            phone_number=validated_data.get('phone_number', None),
-            role=validated_data.get('role', 'user')  # Default a 'user' se non specificato
+            phone_number=validated_data.get('phone_number', '-'),
+            role='user'
+
         )
         user.set_password(validated_data['password'])  # Hash della password
         user.save()
@@ -36,9 +39,28 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 # Serializer per la registrazione degli utenti
 class UserSerializer(serializers.ModelSerializer):
+    is_manager = serializers.BooleanField(required=False)  # Aggiunto per il ruolo manager
+
     class Meta:
-        model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'role']
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'is_manager']
+
+    def create(self, validated_data):
+        is_manager = validated_data.pop('is_manager', False)
+        user = User.objects.create_user(**validated_data)
+        user.is_manager = is_manager
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        is_manager = validated_data.pop('is_manager', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if is_manager is not None:
+            instance.is_manager = is_manager
+        instance.save()
+        return instance
+
 
 # Serializer per gli asset
 class AssetSerializer(serializers.ModelSerializer):

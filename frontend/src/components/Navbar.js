@@ -44,6 +44,8 @@ function Navbar() {
                         <li><Link to="/acquisitions">📑 Acquisitions</Link></li>
                         <li><Link to="/reports">📊 Reports</Link></li>
                         <li><Link to="/locations">📍 Locations</Link></li>
+                        <li><Link to="/profile">🔑 Profile</Link></li>
+
                     </>
                 ) : userRole === "user" ? (
                     <>
@@ -51,11 +53,13 @@ function Navbar() {
                         <li><Link to="/acquired-assets">✅ Acquired Assets</Link></li>
                         <li><Link to="/reports">📊 Reports</Link></li>
                         <li><Link to="/locations">📍 Locations</Link></li>
+                        <li><Link to="/profile">🔑 Profile</Link></li>
                     </>
                 ) : (
                     <li>🔄 Caricamento...</li> // Mostra "Caricamento" se ancora non ha caricato
                 )}
-                <li><Link to="/profile">🔑 Profile</Link></li>
+
+                <li><Link to="/login">🚪 Logout</Link></li>
             </ul>
         </nav>
     );

@@ -6,6 +6,7 @@ import EditItemModal from "../components/EditItemModal";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import axios from "axios";
 import "../style.css";
+import {FaSortAmountDown, FaSortAmountUp} from "react-icons/fa";
 
 function Acquisitions() {
     const [acquisitions, setAcquisitions] = useState([]);
@@ -45,6 +46,7 @@ function Acquisitions() {
     }, []);
 
     const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
+    const toggleSortOrder = () => setSortOrder(sortOrder === "asc" ? "desc" : "asc");
 
     const handleRemoveAcquisition = async (id) => {
         try {
@@ -171,8 +173,9 @@ function Acquisitions() {
                                 <input type="checkbox" checked={showActiveOnly} onChange={() => setShowActiveOnly(!showActiveOnly)} />
                                 Mostra solo attivi
                             </label>
-                            <button className="sort-button" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                                 {sortOrder === "asc" ? "⬇️ Ordina Decrescente" : "⬆️ Ordina Crescente"}
+                            <button className="sort-button" onClick={toggleSortOrder}>
+                                {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                                {sortOrder === "asc" ? " Data Acquisizione Crescente" : " Data Acquisizione Decrescente"}
                             </button>
                         </div>
                         <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Acquisizione</button>
