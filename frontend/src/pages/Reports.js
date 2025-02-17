@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import Navbar from "../components/Navbar";
 import UserInfo from "../components/UserInfo";
 import AddItemModal from "../components/AddItemModal";
 import EditItemModal from "../components/EditItemModal";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
+import {BsThreeDotsVertical} from "react-icons/bs";
+import {FaSortAmountDown, FaSortAmountUp} from "react-icons/fa";
 import axios from "axios";
 import "../style.css";
 
@@ -28,15 +28,15 @@ function Reports() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
-                const headers = { Authorization: `Bearer ${token}` };
+                const headers = {Authorization: `Bearer ${token}`};
 
-                const requests=[
-                    axios.get("http://localhost:8001/api/acquisitions/", { headers }),
-                    axios.get("http://localhost:8001/api/reports/", { headers }),
-                    axios.get("http://localhost:8001/api/assignments/", { headers })
+                const requests = [
+                    axios.get("http://localhost:8001/api/acquisitions/", {headers}),
+                    axios.get("http://localhost:8001/api/reports/", {headers}),
+                    axios.get("http://localhost:8001/api/assignments/", {headers})
                 ];
                 if (userRole === 'manager') {
-                    requests.push(axios.get("http://localhost:8001/api/users/", { headers }));
+                    requests.push(axios.get("http://localhost:8001/api/users/", {headers}));
                 }
                 const [acqRes, reportRes, assignmentRes, userRes] = await Promise.all(requests);
 
@@ -68,11 +68,11 @@ function Reports() {
     const uniqueAssets = Array.from(new Set(visibleAssignments.map(a => a.asset_name)))
         .map((asset, index) => {
             const assignment = visibleAssignments.find(a => a.asset_name === asset);
-            return { key: `asset-${assignment?.id || index}`, value: assignment?.id, label: asset };
+            return {key: `asset-${assignment?.id || index}`, value: assignment?.id, label: asset};
         });
 
     const handleAddReport = async (formData) => {
-        const { asset, title, description } = formData;
+        const {asset, title, description} = formData;
         const selectedUser = userRole === "manager" ? formData.user : userId;
         console.log("📝 Dati dal modal:", formData);
 
@@ -117,13 +117,13 @@ function Reports() {
 
         console.log("✅ Acquisition finale trovata:", acquisition);
 
-        const dataToSend = { acquisition: acquisition.id, title, description };
+        const dataToSend = {acquisition: acquisition.id, title, description};
         console.log("📤 Dati inviati al backend:", dataToSend);
 
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.post("http://localhost:8001/api/reports/", dataToSend, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            const response = await axios.post("http://localhost:8001/api/reports/", dataToSend, {headers});
             setReports([...reports, response.data]);
             setShowAddModal(false);
         } catch (error) {
@@ -135,14 +135,14 @@ function Reports() {
 
     const handleEditReport = async (formData) => {
         if (!selectedReport) return;
-        const { title, description } = formData;
-        const dataToSend = { title, description, acquisition: selectedReport.acquisition };
+        const {title, description} = formData;
+        const dataToSend = {title, description, acquisition: selectedReport.acquisition};
         console.log("📤 Dati inviati al backend per modifica:", dataToSend);
 
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.put(`http://localhost:8001/api/reports/${selectedReport.id}/`, dataToSend, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            const response = await axios.put(`http://localhost:8001/api/reports/${selectedReport.id}/`, dataToSend, {headers});
             setReports(reports.map(r => (r.id === selectedReport.id ? response.data : r)));
             setShowEditModal(false);
         } catch (error) {
@@ -154,8 +154,8 @@ function Reports() {
     const handleRemoveReport = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            await axios.delete(`http://localhost:8001/api/reports/${id}/`, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            await axios.delete(`http://localhost:8001/api/reports/${id}/`, {headers});
             setReports(reports.filter(report => report.id !== id));
         } catch (error) {
             console.error("Errore durante la rimozione del report:", error);
@@ -165,18 +165,19 @@ function Reports() {
 
     return (
         <>
-            <Navbar />
-            <UserInfo />
+            <Navbar/>
+            <UserInfo/>
             <div className="page-content">
                 <div className="table-container">
                     <div className="table-header">
                         <h1>Gestione Report</h1>
                         <div className="controls">
                             <button className="sort-button" onClick={toggleSortOrder}>
-                                {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                                {sortOrder === "asc" ? <FaSortAmountDown/> : <FaSortAmountUp/>}
                                 {sortOrder === "asc" ? " Data Creazione Crescente" : " Data Creazione  Decrescente"}
                             </button>
-                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Report</button>
+                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Report
+                            </button>
                         </div>
                     </div>
                     <table className="styled-table">
@@ -206,10 +207,14 @@ function Reports() {
                                     <td>{new Date(report.created_at).toLocaleString("it-IT")}</td>
                                     <td className="actions-column">
                                         <div className="dropdown">
-                                            <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(report.id)} />
+                                            <BsThreeDotsVertical className="menu-icon"
+                                                                 onClick={() => toggleMenu(report.id)}/>
                                             {menuOpen === report.id && (
                                                 <div className="dropdown-menu show">
-                                                    <p onClick={() => { setSelectedReport(report); setShowEditModal(true); }}>✏️ Modifica</p>
+                                                    <p onClick={() => {
+                                                        setSelectedReport(report);
+                                                        setShowEditModal(true);
+                                                    }}>✏️ Modifica</p>
                                                     <p onClick={() => handleRemoveReport(report.id)}>🗑️ Rimuovi</p>
                                                 </div>
                                             )}
@@ -229,7 +234,12 @@ function Reports() {
                     handleClose={() => setShowAddModal(false)}
                     handleSave={handleAddReport}
                     fields={[
-                        ...(userRole === 'manager' ? [{ name: "user", label: "Utente", type: "select", options: users.map(u => ({ value: u.id, label: u.username })) }] : []),
+                        ...(userRole === 'manager' ? [{
+                            name: "user",
+                            label: "Utente",
+                            type: "select",
+                            options: users.map(u => ({value: u.id, label: u.username}))
+                        }] : []),
                         {
                             name: "asset",
                             label: "Asset",
@@ -240,8 +250,8 @@ function Reports() {
                                 label: a.label
                             }))
                         },
-                        { name: "title", label: "Titolo", type: "text" },
-                        { name: "description", label: "Descrizione", type: "textarea" }
+                        {name: "title", label: "Titolo", type: "text"},
+                        {name: "description", label: "Descrizione", type: "textarea"}
                     ]}
                 />
             )}
@@ -252,8 +262,13 @@ function Reports() {
                     handleSave={handleEditReport}
                     initialData={selectedReport}
                     fields={[
-                        { name: "title", label: "Titolo", type: "text", defaultValue: selectedReport?.title },
-                        { name: "description", label: "Descrizione", type: "textarea", defaultValue: selectedReport?.description }
+                        {name: "title", label: "Titolo", type: "text", defaultValue: selectedReport?.title},
+                        {
+                            name: "description",
+                            label: "Descrizione",
+                            type: "textarea",
+                            defaultValue: selectedReport?.description
+                        }
                     ]}
                 />
             )}

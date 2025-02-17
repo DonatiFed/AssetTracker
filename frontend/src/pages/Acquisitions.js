@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import Navbar from "../components/Navbar";
 import UserInfo from "../components/UserInfo";
 import AddItemModal from "../components/AddItemModal";
 import EditItemModal from "../components/EditItemModal";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import {BsThreeDotsVertical} from "react-icons/bs";
 import axios from "axios";
 import "../style.css";
 import {FaSortAmountDown, FaSortAmountUp} from "react-icons/fa";
@@ -25,13 +25,13 @@ function Acquisitions() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
-                const headers = { Authorization: `Bearer ${token}` };
+                const headers = {Authorization: `Bearer ${token}`};
 
                 const [acquisitionsRes, usersRes, assignmentsRes, locationsRes] = await Promise.all([
-                    axios.get("http://localhost:8001/api/acquisitions/", { headers }),
-                    axios.get("http://localhost:8001/api/users/", { headers }),
-                    axios.get("http://localhost:8001/api/assignments/", { headers }),
-                    axios.get("http://localhost:8001/api/locations/", { headers })
+                    axios.get("http://localhost:8001/api/acquisitions/", {headers}),
+                    axios.get("http://localhost:8001/api/users/", {headers}),
+                    axios.get("http://localhost:8001/api/assignments/", {headers}),
+                    axios.get("http://localhost:8001/api/locations/", {headers})
                 ]);
 
                 setAcquisitions(acquisitionsRes.data);
@@ -52,9 +52,13 @@ function Acquisitions() {
         try {
             const token = localStorage.getItem("access_token");
             await axios.patch(`http://localhost:8001/api/acquisitions/${id}/deactivate/`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: {Authorization: `Bearer ${token}`}
             });
-            setAcquisitions(acquisitions.map(acq => acq.id === id ? { ...acq, is_active: false,removed_at:new Date().toISOString()  } : acq));
+            setAcquisitions(acquisitions.map(acq => acq.id === id ? {
+                ...acq,
+                is_active: false,
+                removed_at: new Date().toISOString()
+            } : acq));
         } catch (error) {
             console.error("Errore durante la rimozione dell'acquisition:", error);
         }
@@ -62,7 +66,7 @@ function Acquisitions() {
     };
 
     const handleAddAcquisition = async (formData) => {
-        const { user, asset, quantity, location } = formData;
+        const {user, asset, quantity, location} = formData;
 
         const userId = parseInt(user, 10);
         const assetId = parseInt(asset, 10);
@@ -96,8 +100,8 @@ function Acquisitions() {
 
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.post("http://localhost:8001/api/acquisitions/", payload, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            const response = await axios.post("http://localhost:8001/api/acquisitions/", payload, {headers});
 
             setAcquisitions([...acquisitions, response.data]);
             setShowAddModal(false);
@@ -136,7 +140,7 @@ function Acquisitions() {
             const response = await axios.put(
                 `http://localhost:8001/api/acquisitions/${selectedAcquisition.id}/`,
                 requestData,
-                { headers: { Authorization: `Bearer ${token}` } }
+                {headers: {Authorization: `Bearer ${token}`}}
             );
 
             console.log("✅ DEBUG: Risposta ricevuta dal backend:", response.data);
@@ -162,23 +166,25 @@ function Acquisitions() {
 
     return (
         <>
-            <Navbar />
+            <Navbar/>
             <div className="content-container">
-                <UserInfo />
+                <UserInfo/>
                 <div className="table-container">
                     <div className="table-header">
                         <h1>Gestione Acquisizioni</h1>
                         <div className="controls">
                             <label className="checkbox-label">
-                                <input type="checkbox" checked={showActiveOnly} onChange={() => setShowActiveOnly(!showActiveOnly)} />
+                                <input type="checkbox" checked={showActiveOnly}
+                                       onChange={() => setShowActiveOnly(!showActiveOnly)}/>
                                 Mostra solo attivi
                             </label>
                             <button className="sort-button" onClick={toggleSortOrder}>
-                                {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                                {sortOrder === "asc" ? <FaSortAmountDown/> : <FaSortAmountUp/>}
                                 {sortOrder === "asc" ? " Data Acquisizione Crescente" : " Data Acquisizione Decrescente"}
                             </button>
                         </div>
-                        <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Acquisizione</button>
+                        <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Acquisizione
+                        </button>
                     </div>
                     <table className="styled-table">
                         <thead>
@@ -214,7 +220,8 @@ function Acquisitions() {
                                 <td className="actions-column">
                                     {acq.is_active ? (
                                         <>
-                                            <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(acq.id)} />
+                                            <BsThreeDotsVertical className="menu-icon"
+                                                                 onClick={() => toggleMenu(acq.id)}/>
                                             {menuOpen === acq.id && (
                                                 <div className="dropdown-menu show">
                                                     <p onClick={() => handleEdit(acq)}>✏️ Modifica</p>
@@ -238,13 +245,28 @@ function Acquisitions() {
                     handleClose={() => setShowAddModal(false)}
                     handleSave={handleAddAcquisition}
                     fields={[
-                        { name: "user", label: "Utente", type: "select", options: users.map(u => ({ value: u.id, label: u.username })) },
-                        { name: "asset", label: "Asset", type: "select", options: Array.from(new Set(assignments.map(a => a.asset))).map(assetId => {
+                        {
+                            name: "user",
+                            label: "Utente",
+                            type: "select",
+                            options: users.map(u => ({value: u.id, label: u.username}))
+                        },
+                        {
+                            name: "asset",
+                            label: "Asset",
+                            type: "select",
+                            options: Array.from(new Set(assignments.map(a => a.asset))).map(assetId => {
                                 const asset = assignments.find(a => a.asset === assetId)?.asset_name;
-                                return { value: assetId, label: asset };
-                            })},
-                        { name: "quantity", label: "Quantità", type: "number", min: 1 },
-                        { name: "location", label: "Location", type: "select", options: locations.map(l => ({ value: l.id, label: l.name })) }
+                                return {value: assetId, label: asset};
+                            })
+                        },
+                        {name: "quantity", label: "Quantità", type: "number", min: 1},
+                        {
+                            name: "location",
+                            label: "Location",
+                            type: "select",
+                            options: locations.map(l => ({value: l.id, label: l.name}))
+                        }
                     ]}
                 />
 
@@ -255,7 +277,12 @@ function Acquisitions() {
                     handleClose={() => setShowEditModal(false)}
                     handleSave={handleSaveEdit}
                     initialData={selectedAcquisition}  // ✅ Passiamo i dati selezionati
-                    fields={[{ name: "quantity", label: "Quantità", type: "number", defaultValue: selectedAcquisition.quantity }]}
+                    fields={[{
+                        name: "quantity",
+                        label: "Quantità",
+                        type: "number",
+                        defaultValue: selectedAcquisition.quantity
+                    }]}
                 />
             )}
         </>

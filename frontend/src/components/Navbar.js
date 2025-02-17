@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, {useEffect, useState} from "react";
+import {Link} from "react-router-dom";
 import axios from "axios";
 import "../style.css";
 
@@ -16,7 +16,7 @@ function Navbar() {
                 }
 
                 const response = await axios.get("http://localhost:8001/users/me/", {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {Authorization: `Bearer ${token}`}
                 });
 
                 if (response.data && response.data.role) {

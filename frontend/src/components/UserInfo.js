@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
 import "../style.css"; // Assicurati che le nuove classi CSS siano incluse
 

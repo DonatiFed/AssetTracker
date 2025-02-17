@@ -1,10 +1,10 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import Navbar from "../components/Navbar";
 import UserInfo from "../components/UserInfo";
 import AddItemModal from "../components/AddItemModal";
 import EditItemModal from "../components/EditItemModal";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
+import {BsThreeDotsVertical} from "react-icons/bs";
+import {FaSortAmountDown, FaSortAmountUp} from "react-icons/fa";
 import axios from "axios";
 import "../style.css";
 import acquisitions from "./Acquisitions";
@@ -32,12 +32,12 @@ function AcquiredAssets() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
-                const headers = { Authorization: `Bearer ${token}` };
+                const headers = {Authorization: `Bearer ${token}`};
 
                 const [acquisitionsRes, assignmentsRes, locationsRes] = await Promise.all([
-                    axios.get("http://localhost:8001/api/acquisitions/", { headers }),
-                    axios.get("http://localhost:8001/api/assignments/", { headers }),
-                    axios.get("http://localhost:8001/api/locations/", { headers })
+                    axios.get("http://localhost:8001/api/acquisitions/", {headers}),
+                    axios.get("http://localhost:8001/api/assignments/", {headers}),
+                    axios.get("http://localhost:8001/api/locations/", {headers})
                 ]);
 
                 setAcquiredAssets(acquisitionsRes.data);
@@ -65,23 +65,23 @@ function AcquiredAssets() {
             return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
         });
 
-    const handleRemoveAcquisition = async ( id) => {
+    const handleRemoveAcquisition = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
             await axios.patch(`http://localhost:8001/api/acquisitions/${id}/deactivate/`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: {Authorization: `Bearer ${token}`}
             });
             setAcquiredAssets(acquiredAssets.map(asset =>
-                asset.id === id ? { ...asset, is_active: false ,removed_at:new Date().toISOString() } : asset
+                asset.id === id ? {...asset, is_active: false, removed_at: new Date().toISOString()} : asset
             ));
         } catch (error) {
             console.error("Errore durante la rimozione dell'acquisition:", error);
-    }
+        }
         setMenuOpen(null);
     };
 
     const handleAddAcquisition = async (formData) => {
-        const { assignment, quantity, location } = formData;
+        const {assignment, quantity, location} = formData;
         // Rimuoviamo l'acquired_at, il backend lo imposta automaticamente
         const dataToSend = {
             assignment: assignment,
@@ -96,8 +96,8 @@ function AcquiredAssets() {
         // 4. Prova a inviare l'acquisizione al backend
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.post("http://localhost:8001/api/acquisitions/", dataToSend, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            const response = await axios.post("http://localhost:8001/api/acquisitions/", dataToSend, {headers});
 
             // Aggiorniamo lo stato acquisizioni in modo IMMEDIATO
             setAcquiredAssets((prevAssets) => [...prevAssets, response.data]);
@@ -132,7 +132,7 @@ function AcquiredAssets() {
             console.log("📤 DEBUG: Inviando richiesta PUT per modifica:", requestData);
 
             const response = await axios.put(`http://localhost:8001/api/acquisitions/${selectedAsset.id}/`, requestData, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: {Authorization: `Bearer ${token}`}
             });
 
             console.log("✅ DEBUG: Risposta ricevuta dal backend:", response.data);
@@ -151,8 +151,8 @@ function AcquiredAssets() {
 
     return (
         <>
-            <Navbar />
-            <UserInfo />
+            <Navbar/>
+            <UserInfo/>
             <div className="page-content">
                 <div className="table-container">
                     <div className="table-header">
@@ -160,14 +160,15 @@ function AcquiredAssets() {
                         <div className="controls">
                             <label className="checkbox-container">
                                 Mostra solo attivi
-                                <input type="checkbox" checked={showActiveOnly} onChange={toggleActiveOnly} />
+                                <input type="checkbox" checked={showActiveOnly} onChange={toggleActiveOnly}/>
                                 <span className="checkmark"></span>
                             </label>
                             <button className="sort-button" onClick={toggleSortOrder}>
-                                {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                                {sortOrder === "asc" ? <FaSortAmountDown/> : <FaSortAmountUp/>}
                                 {sortOrder === "asc" ? " Ordina Crescente" : " Ordina Decrescente"}
                             </button>
-                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Acquire New Asset</button>
+                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Acquire New Asset
+                            </button>
                         </div>
                     </div>
                     <table className="styled-table">
@@ -198,7 +199,8 @@ function AcquiredAssets() {
                                 <td className="actions-column">
                                     {asset.is_active ? (
                                         <div className="dropdown">
-                                            <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(asset.id)} />
+                                            <BsThreeDotsVertical className="menu-icon"
+                                                                 onClick={() => toggleMenu(asset.id)}/>
                                             {menuOpen === asset.id && (
                                                 <div className="dropdown-menu show">
                                                     <p onClick={() => handleEdit(asset)}>✏️ Modifica</p>
@@ -211,7 +213,9 @@ function AcquiredAssets() {
                                     )}
                                 </td>
                             </tr>
-                        )) : <tr><td colSpan="7">Nessun asset acquisito trovato</td></tr>}
+                        )) : <tr>
+                            <td colSpan="7">Nessun asset acquisito trovato</td>
+                        </tr>}
                         </tbody>
                     </table>
                 </div>
@@ -222,13 +226,19 @@ function AcquiredAssets() {
                     handleClose={() => setShowAddModal(false)}
                     handleSave={handleAddAcquisition}
                     fields={[
-                        { name: "assignment", label: "Assegnamento", type: "select", options: assignments.map(a => ({
+                        {
+                            name: "assignment", label: "Assegnamento", type: "select", options: assignments.map(a => ({
                                 value: a.id,  // ✅ Passiamo l'ID dell'assegnazione
                                 label: `${a.asset_name} (ID: ${a.id})`  // ✅ Mostriamo il nome dell'asset
                             }))
                         },
-                        { name: "quantity", label: "Quantità", type: "number" },
-                        { name: "location", label: "Location", type: "select", options: locations.map(l => ({ value: l.id, label: l.name })) }
+                        {name: "quantity", label: "Quantità", type: "number"},
+                        {
+                            name: "location",
+                            label: "Location",
+                            type: "select",
+                            options: locations.map(l => ({value: l.id, label: l.name}))
+                        }
                     ]}
                 />
             )}
@@ -238,11 +248,17 @@ function AcquiredAssets() {
                     handleClose={() => setShowEditModal(false)}
                     handleSave={handleSaveEdit}
                     initialData={selectedAsset}
-                    fields={[{ name: "quantity", label: "Quantità", type: "number", defaultValue: selectedAsset?.quantity }]}
+                    fields={[{
+                        name: "quantity",
+                        label: "Quantità",
+                        type: "number",
+                        defaultValue: selectedAsset?.quantity
+                    }]}
                 />
             )}
         </>
     );
 }
+
 export default AcquiredAssets;
 

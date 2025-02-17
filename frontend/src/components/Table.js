@@ -1,8 +1,8 @@
 import React from "react";
-import { Table } from "react-bootstrap";
+import {Table} from "react-bootstrap";
 import "../style.css";
 
-function DataTable({ data }) {
+function DataTable({data}) {
     return (
         <div className="table-container">
             <Table striped bordered hover responsive className="shadow">
@@ -20,7 +20,9 @@ function DataTable({ data }) {
                             {Object.values(item).map((value, i) => <td key={i}>{value}</td>)}
                         </tr>
                     ))
-                    : <tr><td colSpan="100%">Nessun dato disponibile</td></tr>}
+                    : <tr>
+                        <td colSpan="100%">Nessun dato disponibile</td>
+                    </tr>}
                 </tbody>
             </Table>
         </div>

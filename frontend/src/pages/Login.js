@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import '../style.css';
-import { useEffect } from 'react';
+import {useEffect} from 'react';
 
 function Login() {
     const [username, setUsername] = useState('');
@@ -33,7 +33,7 @@ function Login() {
 
             // Recupera i dati dell'utente
             const userResponse = await axios.get('http://localhost:8001/users/me/', {
-                headers: { Authorization: `Bearer ${response.data.access}` }
+                headers: {Authorization: `Bearer ${response.data.access}`}
             });
 
             // Salva il ruolo

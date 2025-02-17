@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import Navbar from "../components/Navbar";
 import AddItemModal from "../components/AddItemModal";
 import EditItemModal from "../components/EditItemModal";
 import UserInfo from "../components/UserInfo";
 import "../style.css";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import {BsThreeDotsVertical} from "react-icons/bs";
 import axios from "axios";
 
 function Locations() {
@@ -19,11 +19,11 @@ function Locations() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
-                const headers = { Authorization: `Bearer ${token}` };
+                const headers = {Authorization: `Bearer ${token}`};
                 const userRole = localStorage.getItem("user_role");
                 setRole(userRole);
 
-                const response = await axios.get("http://localhost:8001/api/locations/", { headers });
+                const response = await axios.get("http://localhost:8001/api/locations/", {headers});
                 setLocations(response.data);
             } catch (error) {
                 console.error("Errore nel recupero delle locations:", error);
@@ -37,8 +37,8 @@ function Locations() {
     const handleAddLocation = async (data) => {
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.post("http://localhost:8001/api/locations/", data, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            const response = await axios.post("http://localhost:8001/api/locations/", data, {headers});
             setLocations([...locations, response.data]);
             setShowAddModal(false);
         } catch (error) {
@@ -55,8 +55,8 @@ function Locations() {
         };
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.put(`http://localhost:8001/api/locations/${id}/`, formattedData, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            const response = await axios.put(`http://localhost:8001/api/locations/${id}/`, formattedData, {headers});
             setLocations(locations.map(loc => (loc.id === id ? response.data : loc)));
             setShowEditModal(false);
         } catch (error) {
@@ -66,8 +66,8 @@ function Locations() {
     const handleRemoveLocation = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            await axios.delete(`http://localhost:8001/api/locations/${id}/`, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            await axios.delete(`http://localhost:8001/api/locations/${id}/`, {headers});
             setLocations(locations.filter(loc => loc.id !== id));
         } catch (error) {
             console.error("Errore durante la rimozione della location:", error);
@@ -84,14 +84,15 @@ function Locations() {
 
     return (
         <>
-            <Navbar />
+            <Navbar/>
             <div className="content-container">
-                <UserInfo />
+                <UserInfo/>
                 <div className="table-container">
                     <div className="table-header">
                         <h1>Gestione Locations</h1>
                         {role === "manager" && (
-                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Location</button>
+                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi
+                                Location</button>
                         )}
                     </div>
                     <table className="styled-table">
@@ -113,10 +114,14 @@ function Locations() {
                                 <td>{location.description}</td>
                                 {role === "manager" && (
                                     <td className="actions-column">
-                                        <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(location.id)} />
+                                        <BsThreeDotsVertical className="menu-icon"
+                                                             onClick={() => toggleMenu(location.id)}/>
                                         {menuOpen === location.id && (
                                             <div className="dropdown-menu show">
-                                                <p onClick={() => { setSelectedLocation(location); setShowEditModal(true); }}>✏️ Modifica</p>
+                                                <p onClick={() => {
+                                                    setSelectedLocation(location);
+                                                    setShowEditModal(true);
+                                                }}>✏️ Modifica</p>
                                                 <p onClick={() => handleRemoveLocation(location.id)}>🗑️ Rimuovi</p>
                                             </div>
                                         )}
@@ -134,9 +139,9 @@ function Locations() {
                     handleClose={() => setShowAddModal(false)}
                     handleSave={handleAddLocation}
                     fields={[
-                        { name: "name", label: "Nome", type: "text" },
-                        { name: "address", label: "Indirizzo", type: "text" },
-                        { name: "description", label: "Descrizione", type: "textarea" }
+                        {name: "name", label: "Nome", type: "text"},
+                        {name: "address", label: "Indirizzo", type: "text"},
+                        {name: "description", label: "Descrizione", type: "textarea"}
                     ]}
                 />
             )}
@@ -148,9 +153,9 @@ function Locations() {
                     handleSave={(data) => handleEditLocation(selectedLocation.id, data)}  // Corretto qui
                     initialData={selectedLocation}
                     fields={[
-                        { name: "name", label: "Nome", type: "text" },
-                        { name: "address", label: "Indirizzo", type: "text" },
-                        { name: "description", label: "Descrizione", type: "textarea" }
+                        {name: "name", label: "Nome", type: "text"},
+                        {name: "address", label: "Indirizzo", type: "text"},
+                        {name: "description", label: "Descrizione", type: "textarea"}
                     ]}
                 />
             )}

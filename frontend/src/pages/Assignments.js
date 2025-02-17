@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import Navbar from "../components/Navbar";
 import "../style.css";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import {BsThreeDotsVertical} from "react-icons/bs";
 import axios from "axios";
 import AddItemModal from "../components/AddItemModal";
 import UserInfo from "../components/UserInfo";
@@ -33,12 +33,12 @@ function Assignments() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
-                const headers = { Authorization: `Bearer ${token}` };
+                const headers = {Authorization: `Bearer ${token}`};
 
                 const [assignmentsRes, usersRes, assetsRes] = await Promise.all([
-                    axios.get("http://localhost:8001/api/assignments/", { headers }),
-                    axios.get("http://localhost:8001/api/users/", { headers }),
-                    axios.get("http://localhost:8001/api/assets/", { headers }),
+                    axios.get("http://localhost:8001/api/assignments/", {headers}),
+                    axios.get("http://localhost:8001/api/users/", {headers}),
+                    axios.get("http://localhost:8001/api/assets/", {headers}),
                 ]);
 
                 setAssignments(assignmentsRes.data);
@@ -62,7 +62,7 @@ function Assignments() {
         try {
             setIsLoading(true);
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
+            const headers = {Authorization: `Bearer ${token}`};
 
             // Verifica se esiste già un'assegnazione attiva per lo stesso asset e utente
             const existingAssignment = assignments.find(
@@ -86,7 +86,7 @@ function Assignments() {
             const response = await axios.post(
                 "http://localhost:8001/api/assignments/",
                 newAssignmentData,
-                { headers }
+                {headers}
             );
 
             // Aggiorna stato con il nuovo assignment
@@ -106,18 +106,18 @@ function Assignments() {
     const handleRemoveAssignment = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
+            const headers = {Authorization: `Bearer ${token}`};
 
             const response = await axios.patch(
                 `http://localhost:8001/api/assignments/${id}/deactivate/`,
                 {},
-                { headers }
+                {headers}
             );
 
             // Aggiorna lo stato locale
             setAssignments(
                 assignments.map((a) =>
-                    a.id === response.data.id ? { ...a, is_active: false ,removed_at:new Date().toISOString() } : a
+                    a.id === response.data.id ? {...a, is_active: false, removed_at: new Date().toISOString()} : a
                 )
             );
         } catch (error) {
@@ -149,18 +149,19 @@ function Assignments() {
 
     return (
         <>
-            <Navbar />
+            <Navbar/>
             <div className="table-container">
-                <UserInfo />
+                <UserInfo/>
                 <div className="table-header">
                     <h1>Gestione Assegnazioni</h1>
                     <div className="controls">
                         <label className="checkbox-label">
-                            <input type="checkbox" checked={showActiveOnly} onChange={() => setShowActiveOnly(!showActiveOnly)} />
+                            <input type="checkbox" checked={showActiveOnly}
+                                   onChange={() => setShowActiveOnly(!showActiveOnly)}/>
                             Mostra solo attivi
                         </label>
                         <button className="sort-button" onClick={handleSort}>
-                            {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                            {sortOrder === "asc" ? <FaSortAmountDown/> : <FaSortAmountUp/>}
                             {sortOrder === "asc" ? " Data Assegnazione Crescente" : " Data Assegnazione Decrescente"}
                         </button>
                         <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Assegna Asset</button>
@@ -206,7 +207,8 @@ function Assignments() {
                             </td>
                             <td className="actions-column">
                                 <div className="dropdown" ref={(el) => (menuRefs.current[assignment.id] = el)}>
-                                    <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(assignment.id)} />
+                                    <BsThreeDotsVertical className="menu-icon"
+                                                         onClick={() => toggleMenu(assignment.id)}/>
                                     {menuOpen === assignment.id && (
                                         <div className="dropdown-menu show">
                                             {assignment.is_active ? (

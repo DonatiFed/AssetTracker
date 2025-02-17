@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, {useState} from "react";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import "../style.css";
 
@@ -31,7 +31,7 @@ function Register() {
 
         try {
             const response = await axios.post("http://localhost:8001/api/register/", data, {
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
             });
 
             console.log("✅ Risposta API registrazione:", response.data);
@@ -62,10 +62,13 @@ function Register() {
                 <p>Crea un nuovo account</p>
                 {error && <p className="error-message">{error}</p>}
                 <form onSubmit={handleSubmit}>
-                    <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    <input type="text" placeholder="Username" value={username}
+                           onChange={(e) => setUsername(e.target.value)} required/>
+                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
+                           required/>
                     {emailError && <p className="error-message">{emailError}</p>}
-                    <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+                    <input type="password" placeholder="Password" value={password}
+                           onChange={(e) => setPassword(e.target.value)} minLength={8} required/>
                     <button type="submit">Registrati</button>
                 </form>
             </div>

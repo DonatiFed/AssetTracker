@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import "../style.css";
 
-function AddItemModal({ show, handleClose, handleSave, fields }) {
+function AddItemModal({show, handleClose, handleSave, fields}) {
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
@@ -11,7 +11,7 @@ function AddItemModal({ show, handleClose, handleSave, fields }) {
     }, [show]);
 
     const handleChange = (e) => {
-        const { name, value, type } = e.target;
+        const {name, value, type} = e.target;
         setFormData({
             ...formData,
             [name]: type === "number" ? parseInt(value, 10) || "" : value

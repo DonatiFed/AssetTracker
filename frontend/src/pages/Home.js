@@ -6,8 +6,8 @@ import "../style.css";
 function Home() {
     return (
         <>
-            <Navbar />
-            <UserInfo />
+            <Navbar/>
+            <UserInfo/>
             <div className="home-container">
                 <h1>Benvenuto in AssetTracker</h1>
                 <p>Gestisci i tuoi asset in modo semplice ed efficiente.</p>

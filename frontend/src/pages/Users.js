@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import Navbar from "../components/Navbar";
 import UserInfo from "../components/UserInfo";
 import "../style.css";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import {BsThreeDotsVertical} from "react-icons/bs";
 import AddItemModal from "../components/AddItemModal";
 import EditItemModal from "../components/EditItemModal";
-import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
+import {FaSortAmountDown, FaSortAmountUp} from "react-icons/fa";
 import axios from "axios";
 
 function Users() {
@@ -30,12 +30,12 @@ function Users() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
-                const headers = { Authorization: `Bearer ${token}` };
+                const headers = {Authorization: `Bearer ${token}`};
 
                 const [usersRes, assignmentsRes, acquisitionsRes] = await Promise.all([
-                    axios.get("http://localhost:8001/api/users/", { headers }),
-                    axios.get("http://localhost:8001/api/assignments/", { headers }),
-                    axios.get("http://localhost:8001/api/acquisitions/", { headers })
+                    axios.get("http://localhost:8001/api/users/", {headers}),
+                    axios.get("http://localhost:8001/api/assignments/", {headers}),
+                    axios.get("http://localhost:8001/api/acquisitions/", {headers})
                 ]);
 
                 const updatedUsers = usersRes.data.map(user => ({
@@ -66,7 +66,7 @@ function Users() {
         const userAssignments = assignments.filter(a => a.user === userId);
         const assignedAssets = userAssignments.length;
         const holdingAssets = acquisitions.filter(acq => userAssignments.some(a => a.id === acq.assignment && acq.is_active)).length;
-        return { assignedAssets, holdingAssets };
+        return {assignedAssets, holdingAssets};
     };
 
     const handleEdit = (user) => {
@@ -79,8 +79,8 @@ function Users() {
         if (!window.confirm("Sei sicuro di voler rimuovere questo utente?")) return;
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            await axios.delete(`http://localhost:8001/api/users/${id}/`, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            await axios.delete(`http://localhost:8001/api/users/${id}/`, {headers});
             setUsers(users.filter(user => user.id !== id));
         } catch (error) {
             console.error("Errore durante la rimozione:", error);
@@ -91,8 +91,8 @@ function Users() {
         console.log("Dati inviati per aggiunta:", formData);
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.post("http://localhost:8001/api/users/", formData, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            const response = await axios.post("http://localhost:8001/api/users/", formData, {headers});
             setUsers([...users, response.data]);
             setShowAddModal(false);
         } catch (error) {
@@ -105,8 +105,8 @@ function Users() {
         console.log("Dati inviati per modifica:", formData);
         try {
             const token = localStorage.getItem("access_token");
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axios.put(`http://localhost:8001/api/users/${currentUser.id}/`, formData, { headers });
+            const headers = {Authorization: `Bearer ${token}`};
+            const response = await axios.put(`http://localhost:8001/api/users/${currentUser.id}/`, formData, {headers});
             setUsers(users.map(u => u.id === currentUser.id ? response.data : u));
             setShowEditModal(false);
         } catch (error) {
@@ -116,18 +116,19 @@ function Users() {
 
     return (
         <>
-            <Navbar />
+            <Navbar/>
             <div className="content-container">
-                <UserInfo />
+                <UserInfo/>
                 <div className="table-container">
                     <div className="table-header">
                         <h1>Gestione Utenti</h1>
                         <div className="controls">
                             <button className="sort-button" onClick={toggleSortOrder}>
-                                {sortOrder === "asc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                                {sortOrder === "asc" ? <FaSortAmountDown/> : <FaSortAmountUp/>}
                                 {sortOrder === "asc" ? " Username Crescente" : " Username Decrescente"}
                             </button>
-                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Utente</button>
+                            <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Aggiungi Utente
+                            </button>
                         </div>
                     </div>
                     <table className="styled-table">
@@ -147,7 +148,7 @@ function Users() {
                         </thead>
                         <tbody>
                         {sortedUsers.map((user) => {
-                            const { assignedAssets, holdingAssets } = getUserAssetsCount(user.id);
+                            const {assignedAssets, holdingAssets} = getUserAssetsCount(user.id);
                             return (
                                 <tr key={user.id}>
                                     <td>{user.id}</td>
@@ -161,7 +162,8 @@ function Users() {
                                     <td>{holdingAssets}</td>
                                     <td className="actions-column">
                                         <div className="dropdown" ref={(el) => (menuRefs.current[user.id] = el)}>
-                                            <BsThreeDotsVertical className="menu-icon" onClick={() => toggleMenu(user.id)} />
+                                            <BsThreeDotsVertical className="menu-icon"
+                                                                 onClick={() => toggleMenu(user.id)}/>
                                             {menuOpen === user.id && (
                                                 <div className="dropdown-menu show">
                                                     <p onClick={() => handleEdit(user)}>✏️ Modifica</p>
@@ -183,15 +185,17 @@ function Users() {
                     handleClose={() => setShowAddModal(false)}
                     handleSave={handleAddUser}
                     fields={[
-                        { name: "username", label: "Username", type: "text" },
-                        { name: "first_name", label: "Nome", type: "text" },
-                        { name: "last_name", label: "Cognome", type: "text" },
-                        { name: "email", label: "Email", type: "email" },
-                        { name: "phone", label: "Telefono", type: "text" },
-                        { name: "role", label: "Ruolo", type: "select", options: [
-                                { value: "user", label: "User" },
-                                { value: "manager", label: "Manager" }
-                            ]}
+                        {name: "username", label: "Username", type: "text"},
+                        {name: "first_name", label: "Nome", type: "text"},
+                        {name: "last_name", label: "Cognome", type: "text"},
+                        {name: "email", label: "Email", type: "email"},
+                        {name: "phone", label: "Telefono", type: "text"},
+                        {
+                            name: "role", label: "Ruolo", type: "select", options: [
+                                {value: "user", label: "User"},
+                                {value: "manager", label: "Manager"}
+                            ]
+                        }
                     ]}
                 />
             )}
@@ -202,15 +206,17 @@ function Users() {
                     handleSave={handleSaveChanges}
                     initialData={currentUser}
                     fields={[
-                        { name: "username", label: "Username", type: "text", defaultValue: currentUser.username },
-                        { name: "first_name", label: "Nome", type: "text", defaultValue: currentUser.first_name },
-                        { name: "last_name", label: "Cognome", type: "text", defaultValue: currentUser.last_name },
-                        { name: "email", label: "Email", type: "email", defaultValue: currentUser.email },
-                        { name: "phone", label: "Telefono", type: "text", defaultValue: currentUser.phone || "" },  // Aggiunto il campo telefono
-                        { name: "role", label: "Ruolo", type: "select", defaultValue: currentUser.role, options: [
-                                { value: "user", label: "User" },
-                                { value: "manager", label: "Manager" }
-                            ]}
+                        {name: "username", label: "Username", type: "text", defaultValue: currentUser.username},
+                        {name: "first_name", label: "Nome", type: "text", defaultValue: currentUser.first_name},
+                        {name: "last_name", label: "Cognome", type: "text", defaultValue: currentUser.last_name},
+                        {name: "email", label: "Email", type: "email", defaultValue: currentUser.email},
+                        {name: "phone", label: "Telefono", type: "text", defaultValue: currentUser.phone || ""},  // Aggiunto il campo telefono
+                        {
+                            name: "role", label: "Ruolo", type: "select", defaultValue: currentUser.role, options: [
+                                {value: "user", label: "User"},
+                                {value: "manager", label: "Manager"}
+                            ]
+                        }
                     ]}
                 />
             )}

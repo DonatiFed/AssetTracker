@@ -3,11 +3,11 @@ body {
     padding-top: 100px;
     font-family: "Arial", sans-serif;
     background: linear-gradient(135deg, #8B0000, #4B0000);
-    min-height: 100vh;         /* Altezza minima per permettere lo scroll */
-    display: flex;             /* Mantiene l'allineamento centrale */
-    flex-direction: column;    /* Elementi impilati verticalmente */
+    min-height: 100vh; /* Altezza minima per permettere lo scroll */
+    display: flex; /* Mantiene l'allineamento centrale */
+    flex-direction: column; /* Elementi impilati verticalmente */
     justify-content: flex-start; /* Evita che si centri verticalmente */
-    align-items: center;       /* Mantiene la centratura orizzontale */
+    align-items: center; /* Mantiene la centratura orizzontale */
     margin: 0;
 }
 
@@ -103,15 +103,15 @@ body {
 
 /* TABELLA */
 .table-container {
-    overflow: auto;           /* Scroll interno */
+    overflow: auto; /* Scroll interno */
     max-height: calc(100vh - 150px);
     width: 90%;
-    margin: 120px auto 40px;  /* Mantiene il margine */
+    margin: 120px auto 40px; /* Mantiene il margine */
     background: white;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    flex: 1;                  /* Si adatta allo spazio disponibile */
+    flex: 1; /* Si adatta allo spazio disponibile */
 }
 
 .styled-table {
@@ -134,6 +134,7 @@ body {
 .styled-table tbody tr:hover {
     background: #f5f5f5;
 }
+
 .table-header {
     display: flex;
     justify-content: space-between;
@@ -235,8 +236,14 @@ body {
 
 /* Animazioni */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* MODAL OVERLAY */
@@ -433,8 +440,14 @@ body {
 
 /* 🏆 Animazioni */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 
