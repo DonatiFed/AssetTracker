@@ -1,19 +1,22 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Asset, Location, Assignment, Acquisition, Report,CustomUser
+from .models import Asset, Location, Assignment, Acquisition, Report, CustomUser
 from django.db.models import Sum
 from django.contrib.auth.models import User
-# Recupera il modello CustomUser
 
+# recupero il modello CustomUser
 User = get_user_model()
 
+
 class CustomUserSerializer(serializers.ModelSerializer):
-    phone = serializers.CharField(source='phone_number')  # Aggiungi il campo phone
+    phone = serializers.CharField(source='phone_number')  # devo aggiungere il campo phone
+
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone','role']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'role']
 
-# Serializer per la registrazione degli utenti
+
+# Serializer per la registrazione degli utenti(in Register.js)
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
 
@@ -22,24 +25,24 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'password']
 
     def create(self, validated_data):
-        """Crea un nuovo utente con password cifrata"""
+        # si crea un nuovo utente con la password immessa
         user = User(
             username=validated_data['username'],
             email=validated_data['email'],
-            first_name=validated_data.get('first_name', ''),  # Default vuoto se non fornito
+            first_name=validated_data.get('first_name', ''),  # di default è vuoto
             last_name=validated_data.get('last_name', ''),
             phone_number=validated_data.get('phone_number', '-'),
             role='user'
 
         )
-        user.set_password(validated_data['password'])  # Hash della password
+        user.set_password(validated_data['password'])  # hash della pw
         user.save()
         return user
 
 
-# Serializer per la registrazione degli utenti
+# Serializer per la creazione degli utenti (in Users.js)
 class UserSerializer(serializers.ModelSerializer):
-    is_manager = serializers.BooleanField(required=False)  # Aggiunto per il ruolo manager
+    is_manager = serializers.BooleanField(required=False)
 
     class Meta:
         model = User
@@ -71,10 +74,10 @@ class AssetSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'total_quantity', 'available_quantity', 'created_at']
 
     def get_available_quantity(self, obj):
-        """Calcola la quantità disponibile sottraendo le acquisizioni attive dalla quantità totale."""
         acquired_quantity = Acquisition.objects.filter(assignment__asset=obj, is_active=True).aggregate(
+            # si sottraggono le acquisizioni attive alla quantità totale
             total_acquired=Sum('quantity')
-        )['total_acquired'] or 0  # Se non ci sono acquisizioni attive, il valore è 0
+        )['total_acquired'] or 0  # se non ci sono acquisizioni attive si sottrae 0
 
         return obj.total_quantity - acquired_quantity
 
@@ -86,7 +89,7 @@ class LocationSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'description']
 
 
-## Serializer per Assignment
+# Serializer per Assignment
 class AssignmentSerializer(serializers.ModelSerializer):
     user_name = serializers.ReadOnlyField(source="user.username")
     asset_name = serializers.ReadOnlyField(source="asset.name")
@@ -94,68 +97,55 @@ class AssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Assignment
-        fields = ["id", "user", "user_name", "asset", "asset_name", "is_active", "assigned_at","removed_at"]
+        fields = ["id", "user", "user_name", "asset", "asset_name", "is_active", "assigned_at", "removed_at"]
 
     def validate(self, data):
-        """ Impedisce più assignment attivi per la stessa coppia user-asset. """
         user = data['user']
         asset = data['asset']
         if Assignment.objects.filter(user=user, asset=asset, is_active=True).exclude(
                 id=self.instance.id if self.instance else None).exists():
-            raise serializers.ValidationError("Esiste già un assignment attivo per questo utente e asset.")
+            raise serializers.ValidationError(
+                "Esiste già un assignment attivo per questo utente e asset.")  # si impedisce molteplice assegnamento per coppia user-asset
         return data
 
 
-## Serializer per Acquisition
+# Serializer per Acquisition
 class AcquisitionSerializer(serializers.ModelSerializer):
     assignment = serializers.PrimaryKeyRelatedField(queryset=Assignment.objects.all())
-    location=serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
 
     asset_name = serializers.CharField(source='assignment.asset.name', read_only=True)
     user_name = serializers.CharField(source='assignment.user.username', read_only=True)
 
     class Meta:
         model = Acquisition
-        fields = ['id', 'assignment', 'asset_name', 'user_name', 'quantity', 'acquired_at', 'is_active', 'location','removed_at']
+        fields = ['id', 'assignment', 'asset_name', 'user_name', 'quantity', 'acquired_at', 'is_active', 'location',
+                  'removed_at']
 
     def validate(self, data):
-        """ Controlla la validità dell'acquisizione con LOG per debugging. """
-        request = self.context.get('request')  # Otteniamo l'utente dalla richiesta
+        request = self.context.get('request')
         assignment = data['assignment']
         quantity = data['quantity']
-        # Usa il metodo get_available_quantity di AssetSerializer
         asset_serializer = AssetSerializer(assignment.asset)
         available = asset_serializer.get_available_quantity(assignment.asset)
 
-        print(f"🔍 DEBUG: Validazione acquisizione per l'utente {request.user.username}")
-        print(f"🔍 DEBUG: Asset assegnato a {assignment.user.username} - Asset: {assignment.asset.name}, Quantità richiesta: {quantity}")
-
-        # 🔹 Se l'utente NON è un manager, può acquisire solo asset assegnati a lui
-        if not request.user.is_manager and assignment.user != request.user:
-            print(f"❌ ERRORE: {request.user.username} sta cercando di acquisire un asset non assegnato a lui!")
+        if not request.user.is_manager and assignment.user != request.user:  # Se l'utente NON è un manager, può acquisire solo asset assegnati a lui
             raise serializers.ValidationError("Non puoi acquisire asset non assegnati a te.")
 
-        # 🔹 Un utente non può avere più acquisizioni attive per lo stesso asset
-        if Acquisition.objects.filter(assignment__user=assignment.user, assignment__asset=assignment.asset, is_active=True).exists():
-            print(f"❌ ERRORE: {assignment.user.username} ha già un'acquisizione attiva per {assignment.asset.name}!")
+        if Acquisition.objects.filter(assignment__user=assignment.user, assignment__asset=assignment.asset,
+                                      is_active=True).exists():  # Un utente non può avere più acquisizioni attive per lo stesso asset(al massimo modifica la quantità)
             raise serializers.ValidationError("Hai già un'acquisizione attiva per questo asset.")
 
-        # 🔹 Controllo la disponibilità degli asset rispetto a tutte le acquisizioni attive
-        if quantity > available:
+        if quantity > available:  # controllo la disponibilità degli asset rispetto a tutte le acquisizioni attive
             raise serializers.ValidationError(f"Quantità non disponibile. Massimo disponibile: {available}.")
 
-        print("✅ DEBUG: Acquisizione valida, procedo con il salvataggio.")
         return data
 
 
 # Serializer per i report generati dagli utenti
 class ReportSerializer(serializers.ModelSerializer):
-    acquisition = serializers.PrimaryKeyRelatedField(queryset=Acquisition.objects.all())  # Accetta l'ID
+    acquisition = serializers.PrimaryKeyRelatedField(queryset=Acquisition.objects.all())
 
     class Meta:
         model = Report
         fields = ['id', 'acquisition', 'title', 'description', 'created_at']
-
-
-
-

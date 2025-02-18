@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Asset, Location, Assignment, Acquisition, Report
-from django.db.models import Sum,Exists,OuterRef
+from django.db.models import Sum, Exists, OuterRef
+
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -17,9 +18,11 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'password1', 'password2'),
+            'fields': (
+            'username', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'password1', 'password2'),
         }),
     )
+
 
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
@@ -39,10 +42,12 @@ class AssetAdmin(admin.ModelAdmin):
 
     available_quantity.short_description = "Quantità Disponibile"
 
+
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'description')
     search_fields = ('name', 'address')
+
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
@@ -58,19 +63,16 @@ class AssignmentAdmin(admin.ModelAdmin):
 
     mark_as_inactive.short_description = "Segna come inattivi"
 
+
 @admin.register(Acquisition)
 class AcquisitionAdmin(admin.ModelAdmin):
     list_display = ('assignment', 'quantity', 'location', 'acquired_at', 'is_active')
     search_fields = ('assignment__user__username', 'assignment__asset__name')
     list_filter = ('acquired_at', 'is_active')
 
+
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
     list_display = ('title', 'acquisition', 'created_at')
     search_fields = ('title', 'acquisition__assignment__user__username')
     list_filter = ('created_at',)
-
-
-
-
-

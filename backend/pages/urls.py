@@ -15,7 +15,6 @@ router.register(r'acquisitions', AcquisitionViewSet)  # User può acquisire/rila
 router.register(r'reports', ReportViewSet)  # User può scrivere report
 router.register(r'locations', LocationViewSet)  # Manager può aggiungere/modificare luoghi, user li vede
 
-
 urlpatterns = [
     path('api/', include(router.urls)),
     path('users/me/', get_current_user, name='get_current_user'),  # ✅ API per ottenere l'utente attual

@@ -25,13 +25,13 @@ class Asset(models.Model):
     total_quantity = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(default=now, editable=False)
 
-
     def available_quantity(self):
         assigned = sum(a.assigned_quantity for a in self.assignments.all())
         return self.total_quantity - assigned
 
     def __str__(self):
         return f"{self.name} ({self.total_quantity} disponibili)"
+
 
 class Location(models.Model):
     name = models.CharField(max_length=100)
@@ -40,7 +40,6 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
-
 
 
 class Assignment(models.Model):
@@ -54,17 +53,17 @@ class Assignment(models.Model):
         return f"{self.user.username} - {self.asset.name} ({'Attiva' if self.is_active else 'Non attiva'})"
 
 
-
 class Acquisition(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="acquisitions")
-    quantity = models.PositiveIntegerField()  #in futuroo si dovrà tenere conto di una total_quantity e una available_quantity
+    quantity = models.PositiveIntegerField()
     acquired_at = models.DateTimeField(default=now)
-    is_active = models.BooleanField(default=True)  # Indica se l'asset è ancora in uso
+    is_active = models.BooleanField(default=True)  #Indica se l'asset è ancora acquisito o è già stato rilasciato
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, related_name="acquisitions")
     removed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.quantity} x {self.assignment.asset.name} - {self.assignment.user.username} @ {self.location.name if self.location else 'N/A'}"
+
 
 class Report(models.Model):
     acquisition = models.ForeignKey("Acquisition", on_delete=models.CASCADE, related_name="reports")
