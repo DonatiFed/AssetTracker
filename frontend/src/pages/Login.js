@@ -10,7 +10,7 @@ function Login() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     useEffect(() => {
-        localStorage.clear();  // Pulisce tutti i dati salvati localmente
+        localStorage.clear();  // si eliminano tutti i dati salvati
     }, []);
 
     const handleLogin = async (e) => {
@@ -20,27 +20,19 @@ function Login() {
                 username,
                 password
             });
-            console.log("✅ Risposta API login:", response.data);
-            localStorage.setItem("access_token", response.data.access);
-            localStorage.setItem("refresh_token", response.data.refresh);
-
-            // Salva i token nel localStorage
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-            localStorage.setItem('user_id', response.data.user_id);
-            localStorage.setItem('user_role', response.data.role);
 
 
-            // Recupera i dati dell'utente
             const userResponse = await axios.get('http://localhost:8001/users/me/', {
                 headers: {Authorization: `Bearer ${response.data.access}`}
             });
 
-            // Salva il ruolo
-            localStorage.setItem('user_role', userResponse.data.role); // "manager" o "user"
-            localStorage.setItem('user_id', userResponse.data.id);
 
-            // Reindirizza alla home dopo il login
+            localStorage.setItem('user_role', userResponse.data.role); // salvo ruolo e id
+            localStorage.setItem('user_id', userResponse.data.id);
+            console.log(localStorage);
+
             navigate('/home');
         } catch (err) {
             setError('Credenziali non valide');

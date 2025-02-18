@@ -27,14 +27,10 @@ function Register() {
             password
         };
 
-        console.log("📤 Dati inviati per registrazione:", data);
-
         try {
             const response = await axios.post("http://localhost:8001/api/register/", data, {
                 headers: {"Content-Type": "application/json"},
             });
-
-            console.log("✅ Risposta API registrazione:", response.data);
 
             if (response.status === 201) {
                 localStorage.setItem("access_token", response.data.access);
@@ -42,16 +38,10 @@ function Register() {
                 localStorage.setItem("user_id", response.data.id);
                 localStorage.setItem("role", response.data.role);
 
-                console.log("access: ", localStorage.getItem("access_token"), "")
-                console.log("refresh: ", localStorage.getItem("refresh_token"), "")
-                console.log("id: ", localStorage.getItem("user_id"), "")
-                console.log("role: ", localStorage.getItem("role"), "")
-                console.log("🔑 Token salvati in localStorage.");
-
                 navigate("/home");
             }
         } catch (err) {
-            console.error("❌ Errore durante la registrazione:", err.response?.data || err.message);
+            console.error("Errore durante la registrazione:", err.response?.data || err.message);
         }
     };
 

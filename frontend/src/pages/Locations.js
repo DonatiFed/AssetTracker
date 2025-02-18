@@ -47,7 +47,6 @@ function Locations() {
     };
 
     const handleEditLocation = async (id, data) => {
-        console.log("🛠 Dati ricevuti per modifica:", data);
         const formattedData = {
             name: data.name,
             address: data.address,
@@ -72,14 +71,6 @@ function Locations() {
         } catch (error) {
             console.error("Errore durante la rimozione della location:", error);
         }
-    };
-    const handleSubmit = () => {
-        const updatedData = {};
-        fields.forEach((field) => {
-            updatedData[field.name] = formData[field.name];
-        });
-        console.log("📨 Dati inviati da EditItemModal:", updatedData);
-        handleSave(itemId, updatedData); // Assicurati che l'id e i dati siano passati
     };
 
     return (
@@ -150,7 +141,7 @@ function Locations() {
                 <EditItemModal
                     show={showEditModal}
                     handleClose={() => setShowEditModal(false)}
-                    handleSave={(data) => handleEditLocation(selectedLocation.id, data)}  // Corretto qui
+                    handleSave={(data) => handleEditLocation(selectedLocation.id, data)}
                     initialData={selectedLocation}
                     fields={[
                         {name: "name", label: "Nome", type: "text"},

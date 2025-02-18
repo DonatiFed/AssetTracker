@@ -40,7 +40,7 @@ function Users() {
 
                 const updatedUsers = usersRes.data.map(user => ({
                     ...user,
-                    phone: user.phone || ""  // Assegna stringa vuota se phone è undefined
+                    phone: user.phone || ""
                 }));
 
                 setUsers(updatedUsers);
@@ -88,7 +88,6 @@ function Users() {
     };
 
     const handleAddUser = async (formData) => {
-        console.log("Dati inviati per aggiunta:", formData);
         try {
             const token = localStorage.getItem("access_token");
             const headers = {Authorization: `Bearer ${token}`};
@@ -102,7 +101,6 @@ function Users() {
 
     const handleSaveChanges = async (formData) => {
         if (!currentUser) return;
-        console.log("Dati inviati per modifica:", formData);
         try {
             const token = localStorage.getItem("access_token");
             const headers = {Authorization: `Bearer ${token}`};
@@ -210,7 +208,7 @@ function Users() {
                         {name: "first_name", label: "Nome", type: "text", defaultValue: currentUser.first_name},
                         {name: "last_name", label: "Cognome", type: "text", defaultValue: currentUser.last_name},
                         {name: "email", label: "Email", type: "email", defaultValue: currentUser.email},
-                        {name: "phone", label: "Telefono", type: "text", defaultValue: currentUser.phone || ""},  // Aggiunto il campo telefono
+                        {name: "phone", label: "Telefono", type: "text", defaultValue: currentUser.phone || ""},
                         {
                             name: "role", label: "Ruolo", type: "select", defaultValue: currentUser.role, options: [
                                 {value: "user", label: "User"},

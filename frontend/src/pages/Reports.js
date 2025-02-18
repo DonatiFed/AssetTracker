@@ -21,8 +21,6 @@ function Reports() {
     const [error, setError] = useState("");
     const userRole = localStorage.getItem("user_role");
     const userId = localStorage.getItem("user_id");
-    console.log("User_id: ", userId);
-
 
     useEffect(() => {
         const fetchData = async () => {
@@ -63,7 +61,7 @@ function Reports() {
         return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
-    // Mostra asset univoci dagli assignment attivi (limitato allo user corrente se non manager)
+    // mostra asset univoci dagli assignment attivi (per user corrente se non manager)
     const visibleAssignments = assignments;
     const uniqueAssets = Array.from(new Set(visibleAssignments.map(a => a.asset_name)))
         .map((asset, index) => {
@@ -74,52 +72,36 @@ function Reports() {
     const handleAddReport = async (formData) => {
         const {asset, title, description} = formData;
         const selectedUser = userRole === "manager" ? formData.user : userId;
-        console.log("📝 Dati dal modal:", formData);
 
-        // Trova l'assignment selezionato per risalire all'asset e allo user
-        const selectedAssignment = assignments.find(a => a.id === parseInt(asset));
+
+        const selectedAssignment = assignments.find(a => a.id === parseInt(asset)); //trovo l'assignment selezionato per risalire all'asset e allo user
         if (!selectedAssignment) {
-            console.error("❌ Assignment non trovato.");
             setError("Errore: Nessun assignment trovato.");
             return;
         }
-        console.log("🔍 Assignment selezionato:", selectedAssignment);
-
-        const assetId = selectedAssignment.asset;  // Recupera l'ID asset
-
+        const assetId = selectedAssignment.asset;  // id dell'asset
         let assignmentForUser;
 
         if (userRole === "user") {
-            assignmentForUser = selectedAssignment;  // Usa direttamente l'assignment selezionato
-            console.log("🛠️ Assignment scelto per user:", assignmentForUser);
+            assignmentForUser = selectedAssignment;  // se user posso usare direttamente l'assignment selezionato(sarà quello con asset e user corretti),altrimenti devo cercarlo
         } else {
             assignmentForUser = assignments.find(a =>
                 a.user === parseInt(selectedUser) && a.asset === assetId && a.is_active
             );
-            console.log("🔍 Assignment attivo per l'utente e l'asset selezionati:", assignmentForUser);
         }
-
         if (!assignmentForUser) {
-            console.error("❌ Nessun assignment attivo trovato per l'utente e l'asset selezionati.");
             setError("Errore: Nessun assignment attivo trovato.");
             return;
         }
-
         const acquisition = acquisitions.find(acq =>
             acq.is_active && acq.assignment === assignmentForUser.id
         );
 
         if (!acquisition) {
-            console.error("❌ Nessuna acquisition attiva trovata per l'assignment.");
             setError("Errore: Nessuna acquisition attiva trovata per l'utente e l'asset selezionati.");
             return;
         }
-
-        console.log("✅ Acquisition finale trovata:", acquisition);
-
         const dataToSend = {acquisition: acquisition.id, title, description};
-        console.log("📤 Dati inviati al backend:", dataToSend);
-
         try {
             const token = localStorage.getItem("access_token");
             const headers = {Authorization: `Bearer ${token}`};
@@ -137,7 +119,6 @@ function Reports() {
         if (!selectedReport) return;
         const {title, description} = formData;
         const dataToSend = {title, description, acquisition: selectedReport.acquisition};
-        console.log("📤 Dati inviati al backend per modifica:", dataToSend);
 
         try {
             const token = localStorage.getItem("access_token");

@@ -3,11 +3,11 @@ body {
     padding-top: 100px;
     font-family: "Arial", sans-serif;
     background: linear-gradient(135deg, #8B0000, #4B0000);
-    min-height: 100vh; /* Altezza minima per permettere lo scroll */
-    display: flex; /* Mantiene l'allineamento centrale */
-    flex-direction: column; /* Elementi impilati verticalmente */
-    justify-content: flex-start; /* Evita che si centri verticalmente */
-    align-items: center; /* Mantiene la centratura orizzontale */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
     margin: 0;
 }
 
@@ -103,15 +103,15 @@ body {
 
 /* TABELLA */
 .table-container {
-    overflow: auto; /* Scroll interno */
+    overflow: auto; /* scroll interno */
     max-height: calc(100vh - 150px);
     width: 90%;
-    margin: 120px auto 40px; /* Mantiene il margine */
+    margin: 120px auto 40px;
     background: white;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    flex: 1; /* Si adatta allo spazio disponibile */
+    flex: 1;
 }
 
 .styled-table {
@@ -196,8 +196,8 @@ body {
     display: none;
 }
 
-/* Mostra il menu solo quando è attivo */
-.dropdown-menu.show {
+
+.dropdown-menu.show { /* si mostra il menu solo quando è attivo */
     display: block;
 }
 
@@ -219,14 +219,14 @@ body {
     margin-top: 100px;
     text-align: center;
     animation: fadeIn 1.5s ease-in-out;
-    color: white; /* Aggiunto colore bianco */
+    color: white;
 }
 
 .home-container h1 {
     font-size: 36px;
     font-weight: bold;
     margin-bottom: 10px;
-    color: white; /* Aggiunto colore bianco */
+    color: white;
 }
 
 .home-container p {
@@ -246,7 +246,7 @@ body {
     }
 }
 
-/* MODAL OVERLAY */
+/* MODALE */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -260,7 +260,6 @@ body {
     z-index: 1000;
 }
 
-/* MODAL CONTAINER */
 .modal-container {
     background: white;
     color: black;
@@ -272,13 +271,11 @@ body {
     animation: fadeIn 0.3s ease-in-out;
 }
 
-/* TITOLI DEL MODALE */
 .modal-container h2 {
     color: #8B0000;
     margin-bottom: 10px;
 }
 
-/* INPUT DEL MODALE */
 .modal-container input {
     width: 100%;
     padding: 10px;
@@ -288,7 +285,6 @@ body {
     font-size: 14px;
 }
 
-/* BOTTONI DEL MODALE */
 .modal-buttons {
     display: flex;
     justify-content: space-between;
@@ -335,10 +331,10 @@ body {
 }
 
 
-/* 🔹 USER INFO: Sempre accanto alla navbar, senza sovrapporsi */
+/* USER INFO */
 .user-info-container {
     position: absolute;
-    top: 180px; /* Abbassato per allinearsi alla navbar */
+    top: 180px;
     right: 20px;
     background: rgba(255, 255, 255, 0.1);
     padding: 12px 20px;
@@ -351,7 +347,7 @@ body {
     font-weight: bold;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease-in-out;
-    z-index: 1001; /* Si assicura che sia sopra la navbar */
+    z-index: 1001;
 }
 
 .user-info-container:hover {
@@ -370,7 +366,7 @@ body {
     color: #ffcccc;
 }
 
-/* 📌 Profilo Utente */
+/* Profilo Utente */
 .profile-container {
     display: flex;
     flex-direction: column;
@@ -438,7 +434,7 @@ body {
     opacity: 0.8;
 }
 
-/* 🏆 Animazioni */
+/* Animazioni */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -451,7 +447,7 @@ body {
 }
 
 
-/* 🔳 Checkbox e pulsanti di ordinamento */
+/* Checkbox e pulsanti di ordinamento */
 .controls {
     display: flex;
     gap: 15px;

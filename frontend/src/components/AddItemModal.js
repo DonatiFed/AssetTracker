@@ -6,7 +6,7 @@ function AddItemModal({show, handleClose, handleSave, fields}) {
 
     useEffect(() => {
         if (!show) {
-            setFormData({}); // Resetta i campi quando il modal si chiude
+            setFormData({}); //si resettano i campi quando il modal si chiude
         }
     }, [show]);
 
@@ -21,7 +21,7 @@ function AddItemModal({show, handleClose, handleSave, fields}) {
     const handleSubmit = (e) => {
         e.preventDefault();
         handleSave(formData);
-        setFormData({}); // Reset campi dopo il salvataggio
+        setFormData({});
     };
 
     if (!show) return null;

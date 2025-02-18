@@ -16,13 +16,13 @@ import Assignments from "./pages/Assignments";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(
-        !!localStorage.getItem("access_token") // Controlla se il token è presente
+        !!localStorage.getItem("access_token") // si controlla se il token è presente
     );
 
     useEffect(() => {
         const token = localStorage.getItem("access_token");
         console.log("🔍 Controllo iniziale token:", token);
-        setIsLoggedIn(!!token); // Aggiorna lo stato in base al token
+        setIsLoggedIn(!!token); // aggiorno lo stato in base al token
     }, []);
     useEffect(() => {
         console.log("🧩 Stato aggiornato: isLoggedIn =", isLoggedIn);
@@ -44,7 +44,6 @@ function App() {
                 <Route path="/assignments" element={isLoggedIn ? <Assignments/> : <Navigate to="/"/>}/>
                 <Route path="/locations" element={isLoggedIn ? <Locations/> : <Navigate to="/"/>}/>
                 <Route path="/reports" element={isLoggedIn ? <Reports/> : <Navigate to="/"/>}/>
-                <Route path="/history" element={isLoggedIn ? <History/> : <Navigate to="/"/>}/>
                 <Route path="/users" element={isLoggedIn ? <Users/> : <Navigate to="/"/>}/>
                 <Route path="/profile" element={isLoggedIn ? <Profile/> : <Navigate to="/"/>}/>
 

@@ -37,7 +37,7 @@ function UserInfo() {
     }
 
     if (!user) {
-        return null; // Nessun messaggio di caricamento per non sporcare la UI
+        return null;
     }
 
     return (

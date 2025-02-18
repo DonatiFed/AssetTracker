@@ -52,6 +52,6 @@ export default {
         new HtmlWebpackPlugin({
             template: './public/index.html'
         }),
-        new Dotenv()  // <---- CARICA VARIABILI DA `.env`
+        new Dotenv()
     ]
 };

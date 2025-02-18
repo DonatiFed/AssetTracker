@@ -7,7 +7,7 @@ import {BsThreeDotsVertical} from "react-icons/bs";
 import {FaSortAmountDown, FaSortAmountUp} from "react-icons/fa";
 import axios from "axios";
 import "../style.css";
-import acquisitions from "./Acquisitions";
+
 
 function AcquiredAssets() {
     const [acquisitions, setAcquisitions] = useState([]);
@@ -44,7 +44,6 @@ function AcquiredAssets() {
                 setAcquisitions(acquisitionsRes.data);
                 setAssignments(assignmentsRes.data.filter(a => a.is_active));
                 setLocations(locationsRes.data);
-                console.log("📌 DEBUG: Dati assignments ricevuti:", assignmentsRes.data);
 
             } catch (error) {
                 console.error("Errore nel recupero dei dati:", error);
@@ -82,7 +81,6 @@ function AcquiredAssets() {
 
     const handleAddAcquisition = async (formData) => {
         const {assignment, quantity, location} = formData;
-        // Rimuoviamo l'acquired_at, il backend lo imposta automaticamente
         const dataToSend = {
             assignment: assignment,
             location: location,
@@ -90,16 +88,11 @@ function AcquiredAssets() {
 
         };
 
-        console.log("📤 DEBUG: Dati inviati:", dataToSend);
-
-
-        // 4. Prova a inviare l'acquisizione al backend
         try {
             const token = localStorage.getItem("access_token");
             const headers = {Authorization: `Bearer ${token}`};
             const response = await axios.post("http://localhost:8001/api/acquisitions/", dataToSend, {headers});
 
-            // Aggiorniamo lo stato acquisizioni in modo IMMEDIATO
             setAcquiredAssets((prevAssets) => [...prevAssets, response.data]);
             setShowAddModal(false);
             setError("");
@@ -110,7 +103,6 @@ function AcquiredAssets() {
     };
 
     const handleEdit = (asset) => {
-        console.log("✏️ DEBUG: Modifica dell'acquisizione selezionata:", asset);
         setSelectedAsset(asset);
         setShowEditModal(true);
     };
@@ -120,7 +112,6 @@ function AcquiredAssets() {
             const token = localStorage.getItem("access_token");
 
             if (!selectedAsset) {
-                console.error("❌ DEBUG: Nessuna acquisizione selezionata per la modifica.");
                 setError("Errore: Nessuna acquisizione selezionata.");
                 return;
             }
@@ -128,23 +119,16 @@ function AcquiredAssets() {
             const requestData = {
                 quantity: Number(formData.quantity), // Assicuriamoci che sia un numero
             };
-
-            console.log("📤 DEBUG: Inviando richiesta PUT per modifica:", requestData);
-
             const response = await axios.put(`http://localhost:8001/api/acquisitions/${selectedAsset.id}/`, requestData, {
                 headers: {Authorization: `Bearer ${token}`}
             });
 
-            console.log("✅ DEBUG: Risposta ricevuta dal backend:", response.data);
-
-            // Aggiorna lo stato con la nuova quantità
             setAcquiredAssets(acquiredAssets.map(asset =>
                 asset.id === response.data.id ? response.data : asset
             ));
 
             setShowEditModal(false);
         } catch (error) {
-            console.error("❌ DEBUG: Errore durante la modifica dell'acquisizione:", error.response ? error.response.data : error);
             setError("Errore durante la modifica.");
         }
     };
@@ -228,8 +212,8 @@ function AcquiredAssets() {
                     fields={[
                         {
                             name: "assignment", label: "Assegnamento", type: "select", options: assignments.map(a => ({
-                                value: a.id,  // ✅ Passiamo l'ID dell'assegnazione
-                                label: `${a.asset_name} (ID: ${a.id})`  // ✅ Mostriamo il nome dell'asset
+                                value: a.id,
+                                label: `${a.asset_name} (ID: ${a.id})`  //mostro nome dell'asset
                             }))
                         },
                         {name: "quantity", label: "Quantità", type: "number"},

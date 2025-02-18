@@ -9,7 +9,7 @@ function Profile() {
         last_name: "",
         is_manager: false,
         email: "",
-        phone: ""  // Assicura che il numero di telefono non sia undefined
+        phone: ""
     });
     const [editing, setEditing] = useState(false);
     const [editedData, setEditedData] = useState({});
@@ -22,14 +22,13 @@ function Profile() {
                     headers: {Authorization: `Bearer ${token}`},
                 });
                 const data = response.data;
-                console.log("🔍 Dati utente ricevuti:", response.data);
                 setUserData({
                     ...data,
-                    phone: data.phone || "",  // Assicura un valore predefinito
+                    phone: data.phone || "",
                 });
                 setEditedData({
                     ...data,
-                    phone: data.phone || "",  // Stessa cosa per l'input editabile
+                    phone: data.phone || "",
                 });
             } catch (error) {
                 console.error("Errore nel recupero dei dati utente:", error);
@@ -43,12 +42,11 @@ function Profile() {
     const handleChange = (e) => {
         setEditedData({
             ...editedData,
-            [e.target.name]: e.target.value || ""  // Assicura sempre un valore valido
+            [e.target.name]: e.target.value || ""
         });
     };
 
     const handleSave = async () => {
-        console.log("📤 Dati inviati per modifica:", editedData);  // Log per debug
         try {
             const token = localStorage.getItem("access_token");
             await axios.put(`http://localhost:8001/api/users/${userData.id}/`, editedData, {
@@ -64,7 +62,6 @@ function Profile() {
     };
 
     if (!userData) return <p>Caricamento...</p>;
-
     return (
         <>
             <Navbar/>

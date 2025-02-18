@@ -22,7 +22,7 @@ function Navbar() {
                 if (response.data && response.data.role) {
                     setUserRole(response.data.role);
                 } else {
-                    console.error("Ruolo non trovato nella risposta dell'API:", response.data);
+                    console.error("Ruolo non trovato nella risposta dell'api:", response.data);
                 }
             } catch (err) {
                 console.error("Errore nel recupero del ruolo utente:", err);
@@ -42,7 +42,7 @@ function Navbar() {
                         <li><Link to="/assets">📦 Assets</Link></li>
                         <li><Link to="/assignments">📜 Assignments</Link></li>
                         <li><Link to="/acquisitions">📑 Acquisitions</Link></li>
-                        <li><Link to="/reports">📊 Reports</Link></li>
+                        <li><Link to="/reports">📝 Reports</Link></li>
                         <li><Link to="/locations">📍 Locations</Link></li>
                         <li><Link to="/profile">🔑 Profile</Link></li>
 
@@ -51,7 +51,7 @@ function Navbar() {
                     <>
                         <li><Link to="/assets">📦 Assets</Link></li>
                         <li><Link to="/acquired-assets">✅ Acquired Assets</Link></li>
-                        <li><Link to="/reports">📊 Reports</Link></li>
+                        <li><Link to="/reports">📝 Reports</Link></li>
                         <li><Link to="/locations">📍 Locations</Link></li>
                         <li><Link to="/profile">🔑 Profile</Link></li>
                     </>
@@ -59,7 +59,7 @@ function Navbar() {
                     <li>🔄 Caricamento...</li> // Mostra "Caricamento" se ancora non ha caricato
                 )}
 
-                <li><Link to="/login">🚪 Logout</Link></li>
+                <li><Link to="/">🚪 Logout</Link></li>
             </ul>
         </nav>
     );

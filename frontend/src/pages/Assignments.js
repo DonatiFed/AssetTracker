@@ -19,16 +19,10 @@ function Assignments() {
     const [showActiveOnly, setShowActiveOnly] = useState(false);
     const [sortOrder, setSortOrder] = useState("asc");
 
-    const [newAssignment, setNewAssignment] = useState({
-        user: "",
-        asset: "",
-        assigned_quantity: 1,
-        assigned_at: new Date().toISOString(),
-    });
 
     const menuRefs = useRef({});
 
-    // Fetch iniziale dati
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -57,14 +51,12 @@ function Assignments() {
         setMenuOpen(menuOpen === id ? null : id);
     };
 
-    // Aggiunta nuovo assignment
     const handleAddAssignment = async (formData) => {
         try {
             setIsLoading(true);
             const token = localStorage.getItem("access_token");
             const headers = {Authorization: `Bearer ${token}`};
 
-            // Verifica se esiste già un'assegnazione attiva per lo stesso asset e utente
             const existingAssignment = assignments.find(
                 (a) =>
                     a.user === formData.user &&
@@ -79,17 +71,15 @@ function Assignments() {
             }
             const newAssignmentData = {
                 ...formData,
-                assigned_at: new Date().toISOString()  // Invia la data corrente
+                assigned_at: new Date().toISOString()
             };
-            console.log("Dati inviati:", newAssignmentData);
-            // POST all'API
+
             const response = await axios.post(
                 "http://localhost:8001/api/assignments/",
                 newAssignmentData,
                 {headers}
             );
 
-            // Aggiorna stato con il nuovo assignment
             setAssignments([...assignments, response.data]);
             setShowAddModal(false);
             setError("");
@@ -102,8 +92,7 @@ function Assignments() {
     };
 
 
-    // Disattivazione assignment
-    const handleRemoveAssignment = async (id) => {
+    const handleRemoveAssignment = async (id) => {  //l'assignment non viene rimosso ma solo disattivato (così si mantiene  la cronologia)
         try {
             const token = localStorage.getItem("access_token");
             const headers = {Authorization: `Bearer ${token}`};
@@ -114,7 +103,6 @@ function Assignments() {
                 {headers}
             );
 
-            // Aggiorna lo stato locale
             setAssignments(
                 assignments.map((a) =>
                     a.id === response.data.id ? {...a, is_active: false, removed_at: new Date().toISOString()} : a
@@ -252,7 +240,7 @@ function Assignments() {
                     {
                         name: "assigned_at",
                         type: "hidden",
-                        value: new Date().toISOString()  // Data attuale
+                        value: new Date().toISOString()
                     }
                 ]}
             />

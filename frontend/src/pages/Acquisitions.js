@@ -17,8 +17,8 @@ function Acquisitions() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedAcquisition, setSelectedAcquisition] = useState(null);
-    const [showActiveOnly, setShowActiveOnly] = useState(false); // Checkbox per mostrare solo attivi
-    const [sortOrder, setSortOrder] = useState("asc"); // Ordinamento per data
+    const [showActiveOnly, setShowActiveOnly] = useState(false); // checkbox per mostrare solo attivi
+    const [sortOrder, setSortOrder] = useState("asc"); // ordinamento per data di creazione
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -71,11 +71,7 @@ function Acquisitions() {
         const userId = parseInt(user, 10);
         const assetId = parseInt(asset, 10);
 
-        // Filtra gli assignments attivi per asset selezionato
-        console.log("Asset scelto dal form:", formData.asset);
         const validAssignments = assignments.filter(a => parseInt(a.asset) === assetId && a.is_active);
-        console.log("Selected asset ID:", assetId);
-        console.log("Assignments disponibili:", assignments);
 
         if (validAssignments.length === 0) {
             console.error("Errore: Nessun assignment attivo per questo asset.");
@@ -83,7 +79,6 @@ function Acquisitions() {
             return;
         }
 
-        // Seleziona l'assignment corretto per l'user scelto
         const activeAssignment = validAssignments.find(a => a.user === userId);
 
         if (!activeAssignment) {
@@ -113,50 +108,38 @@ function Acquisitions() {
     };
 
     const handleEdit = (acq) => {
-        console.log("✏️ DEBUG: Acquisizione selezionata per modifica:", acq);  // 🔥 Debug
         setSelectedAcquisition(acq);
         setShowEditModal(true);
     };
-
 
     const handleSaveEdit = async (formData) => {
         try {
             const token = localStorage.getItem("access_token");
 
             if (!selectedAcquisition) {
-                console.error("❌ DEBUG: Nessuna acquisizione selezionata per la modifica.");
                 setError("Errore: Nessuna acquisizione selezionata.");
                 return;
             }
 
-            // Creiamo i dati da inviare
             const requestData = {
                 quantity: Number(formData.quantity) // Assicuriamoci che sia un numero
             };
 
-            console.log("📤 DEBUG: Inviando richiesta PUT con dati:", JSON.stringify(requestData, null, 2));
-
-            // Effettuiamo la richiesta PUT
             const response = await axios.put(
                 `http://localhost:8001/api/acquisitions/${selectedAcquisition.id}/`,
                 requestData,
                 {headers: {Authorization: `Bearer ${token}`}}
             );
 
-            console.log("✅ DEBUG: Risposta ricevuta dal backend:", response.data);
-
-            // Aggiorniamo lo stato per riflettere la modifica
             setAcquisitions(acquisitions.map(acq =>
                 acq.id === response.data.id ? response.data : acq
             ));
 
             setShowEditModal(false);
         } catch (error) {
-            console.error("❌ DEBUG: Errore durante la modifica dell'acquisizione:", error.response ? error.response.data : error);
             setError("Errore durante la modifica.");
         }
     };
-    // Definizione di filteredAcquisitions prima del return
     const filteredAcquisitions = acquisitions
         .filter(acq => !showActiveOnly || acq.is_active)
         .sort((a, b) => sortOrder === "asc"
@@ -276,7 +259,7 @@ function Acquisitions() {
                     show={showEditModal}
                     handleClose={() => setShowEditModal(false)}
                     handleSave={handleSaveEdit}
-                    initialData={selectedAcquisition}  // ✅ Passiamo i dati selezionati
+                    initialData={selectedAcquisition}
                     fields={[{
                         name: "quantity",
                         label: "Quantità",
