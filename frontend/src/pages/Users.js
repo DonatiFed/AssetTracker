@@ -153,7 +153,7 @@ function Users() {
                                     <td>{user.username}</td>
                                     <td>{user.first_name}</td>
                                     <td>{user.last_name}</td>
-                                    <td>{user.role === "manager" ? "👔 Manager" : "👤 User"}</td>
+                                    <td>{user.role === "manager" ? " Manager" : " User"}</td>
                                     <td>{user.email}</td>
                                     <td>{user.phone}</td>
                                     <td>{assignedAssets}</td>
@@ -164,8 +164,8 @@ function Users() {
                                                                  onClick={() => toggleMenu(user.id)}/>
                                             {menuOpen === user.id && (
                                                 <div className="dropdown-menu show">
-                                                    <p onClick={() => handleEdit(user)}>✏️ Modifica</p>
-                                                    <p onClick={() => handleRemove(user.id)}>🗑️ Rimuovi</p>
+                                                    <p onClick={() => handleEdit(user)}> Modifica</p>
+                                                    <p onClick={() => handleRemove(user.id)}> Rimuovi</p>
                                                 </div>
                                             )}
                                         </div>

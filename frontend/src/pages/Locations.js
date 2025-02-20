@@ -112,8 +112,8 @@ function Locations() {
                                                 <p onClick={() => {
                                                     setSelectedLocation(location);
                                                     setShowEditModal(true);
-                                                }}>✏️ Modifica</p>
-                                                <p onClick={() => handleRemoveLocation(location.id)}>🗑️ Rimuovi</p>
+                                                }}> Modifica</p>
+                                                <p onClick={() => handleRemoveLocation(location.id)}> Rimuovi</p>
                                             </div>
                                         )}
                                     </td>

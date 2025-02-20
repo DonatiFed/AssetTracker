@@ -195,8 +195,8 @@ function Reports() {
                                                     <p onClick={() => {
                                                         setSelectedReport(report);
                                                         setShowEditModal(true);
-                                                    }}>✏️ Modifica</p>
-                                                    <p onClick={() => handleRemoveReport(report.id)}>🗑️ Rimuovi</p>
+                                                    }}> Modifica</p>
+                                                    <p onClick={() => handleRemoveReport(report.id)}> Rimuovi</p>
                                                 </div>
                                             )}
                                         </div>

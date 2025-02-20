@@ -43,7 +43,7 @@ function UserInfo() {
     return (
         <div className="user-info-container">
             <p>
-                <span className="user-icon">👤</span>
+                <span className="user-icon"> </span>
                 {user.username} ({user.role === "manager" ? "Manager" : "User"})
             </p>
         </div>

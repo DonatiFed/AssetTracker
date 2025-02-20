@@ -74,7 +74,7 @@ function Profile() {
                         <p><strong>Cognome:</strong> {editing ? <input name="last_name" value={editedData.last_name}
                                                                        onChange={handleChange}/> : userData.last_name}
                         </p>
-                        <p><strong>Ruolo:</strong> {userData.role === "manager" ? "👔 Manager" : "👤 User"}</p>
+                        <p><strong>Ruolo:</strong> {userData.role === "manager" ? " Manager" : " User"}</p>
                         <p><strong>Email:</strong> {editing ?
                             <input name="email" value={editedData.email} onChange={handleChange}/> : userData.email}</p>
                         <p><strong>Telefono:</strong> {editing ?
@@ -83,11 +83,11 @@ function Profile() {
                     <div className="profile-actions">
                         {editing ? (
                             <>
-                                <button className="save-button" onClick={handleSave}>💾 Salva Modifiche</button>
-                                <button className="cancel-button" onClick={handleEditToggle}>❌ Annulla</button>
+                                <button className="save-button" onClick={handleSave}> Salva Modifiche</button>
+                                <button className="cancel-button" onClick={handleEditToggle}> Annulla</button>
                             </>
                         ) : (
-                            <button className="edit-button" onClick={handleEditToggle}>✏️ Modifica Profilo</button>
+                            <button className="edit-button" onClick={handleEditToggle}> Modifica Profilo</button>
                         )}
                     </div>
                 </div>

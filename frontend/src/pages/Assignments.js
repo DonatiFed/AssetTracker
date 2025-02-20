@@ -200,9 +200,9 @@ function Assignments() {
                                     {menuOpen === assignment.id && (
                                         <div className="dropdown-menu show">
                                             {assignment.is_active ? (
-                                                <p onClick={() => handleRemoveAssignment(assignment.id)}>🛑 Disattiva</p>
+                                                <p onClick={() => handleRemoveAssignment(assignment.id)}> Disattiva</p>
                                             ) : (
-                                                <p className="disabled">🚫 Già disattivato</p>
+                                                <p className="disabled"> Già disattivato</p>
                                             )}
                                         </div>
                                     )}

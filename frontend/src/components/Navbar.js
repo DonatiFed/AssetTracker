@@ -35,31 +35,31 @@ function Navbar() {
     return (
         <nav className="navbar">
             <ul>
-                <li><Link to="/home">🏠 Home</Link></li>
+                <li><Link to="/home"> Home</Link></li>
                 {userRole === "manager" ? (
                     <>
-                        <li><Link to="/users">👥 Users</Link></li>
-                        <li><Link to="/assets">📦 Assets</Link></li>
-                        <li><Link to="/assignments">📜 Assignments</Link></li>
-                        <li><Link to="/acquisitions">📑 Acquisitions</Link></li>
-                        <li><Link to="/reports">📝 Reports</Link></li>
-                        <li><Link to="/locations">📍 Locations</Link></li>
-                        <li><Link to="/profile">🔑 Profile</Link></li>
+                        <li><Link to="/users"> Users</Link></li>
+                        <li><Link to="/assets"> Assets</Link></li>
+                        <li><Link to="/assignments"> Assignments</Link></li>
+                        <li><Link to="/acquisitions"> Acquisitions</Link></li>
+                        <li><Link to="/reports"> Reports</Link></li>
+                        <li><Link to="/locations"> Locations</Link></li>
+                        <li><Link to="/profile"> Profile</Link></li>
 
                     </>
                 ) : userRole === "user" ? (
                     <>
-                        <li><Link to="/assets">📦 Assets</Link></li>
-                        <li><Link to="/acquired-assets">✅ Acquired Assets</Link></li>
-                        <li><Link to="/reports">📝 Reports</Link></li>
-                        <li><Link to="/locations">📍 Locations</Link></li>
-                        <li><Link to="/profile">🔑 Profile</Link></li>
+                        <li><Link to="/assets"> Assets</Link></li>
+                        <li><Link to="/acquired-assets"> Acquired Assets</Link></li>
+                        <li><Link to="/reports"> Reports</Link></li>
+                        <li><Link to="/locations"> Locations</Link></li>
+                        <li><Link to="/profile"> Profile</Link></li>
                     </>
                 ) : (
-                    <li>🔄 Caricamento...</li> // Mostra "Caricamento" se ancora non ha caricato
+                    <li> Caricamento...</li> // Mostra "Caricamento" se ancora non ha caricato
                 )}
 
-                <li><Link to="/">🚪 Logout</Link></li>
+                <li><Link to="/"> Logout</Link></li>
             </ul>
         </nav>
     );

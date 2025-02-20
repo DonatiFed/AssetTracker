@@ -20,20 +20,22 @@ function App() {
     );
 
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
-        console.log("🔍 Controllo iniziale token:", token);
-        setIsLoggedIn(!!token); // aggiorno lo stato in base al token
+        const handleStorageChange = () => {
+            setIsLoggedIn(!!localStorage.getItem("access_token"));
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+        };
     }, []);
-    useEffect(() => {
-        console.log("🧩 Stato aggiornato: isLoggedIn =", isLoggedIn);
-    }, [isLoggedIn]);
 
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<LandingPage/>}/>
                 <Route path="/login" element={<Login onLogin={() => {
-                    console.log("🔓 Login effettuato, aggiornamento stato...");
                     setIsLoggedIn(true);
                 }}/>}/>
                 <Route path="/register" element={<Register/>}/>

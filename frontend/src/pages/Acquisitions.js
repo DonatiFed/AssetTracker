@@ -207,13 +207,13 @@ function Acquisitions() {
                                                                  onClick={() => toggleMenu(acq.id)}/>
                                             {menuOpen === acq.id && (
                                                 <div className="dropdown-menu show">
-                                                    <p onClick={() => handleEdit(acq)}>✏️ Modifica</p>
-                                                    <p onClick={() => handleRemoveAcquisition(acq.id)}>🗑️ Rimuovi</p>
+                                                    <p onClick={() => handleEdit(acq)}> Modifica</p>
+                                                    <p onClick={() => handleRemoveAcquisition(acq.id)}> Rimuovi</p>
                                                 </div>
                                             )}
                                         </>
                                     ) : (
-                                        <p className="disabled">🚫 Già disattivato</p>
+                                        <p className="disabled"> Già disattivato</p>
                                     )}
                                 </td>
                             </tr>

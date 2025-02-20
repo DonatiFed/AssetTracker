@@ -142,10 +142,10 @@ function AcquiredAssets() {
                     <div className="table-header">
                         <h1>Acquired Assets</h1>
                         <div className="controls">
-                            <label className="checkbox-container">
+                            <label className="checkbox-label">
+                                <input type="checkbox" checked={showActiveOnly}
+                                       onChange={() => setShowActiveOnly(!showActiveOnly)}/>
                                 Mostra solo attivi
-                                <input type="checkbox" checked={showActiveOnly} onChange={toggleActiveOnly}/>
-                                <span className="checkmark"></span>
                             </label>
                             <button className="sort-button" onClick={toggleSortOrder}>
                                 {sortOrder === "asc" ? <FaSortAmountDown/> : <FaSortAmountUp/>}
@@ -187,13 +187,13 @@ function AcquiredAssets() {
                                                                  onClick={() => toggleMenu(asset.id)}/>
                                             {menuOpen === asset.id && (
                                                 <div className="dropdown-menu show">
-                                                    <p onClick={() => handleEdit(asset)}>✏️ Modifica</p>
-                                                    <p onClick={() => handleRemoveAcquisition(asset.id)}>🗑️ Rimuovi</p>
+                                                    <p onClick={() => handleEdit(asset)}> Modifica</p>
+                                                    <p onClick={() => handleRemoveAcquisition(asset.id)}> Rimuovi</p>
                                                 </div>
                                             )}
                                         </div>
                                     ) : (
-                                        <p className="disabled">🚫 Già disattivato</p>
+                                        <p className="disabled"> Già disattivato</p>
                                     )}
                                 </td>
                             </tr>

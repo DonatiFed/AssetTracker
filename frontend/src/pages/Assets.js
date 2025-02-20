@@ -147,8 +147,8 @@ function Assets() {
                                                                  onClick={() => toggleMenu(asset.id)}/>
                                             {menuOpen === asset.id && (
                                                 <div className="dropdown-menu show">
-                                                    <p onClick={() => handleEdit(asset)}>✏️ Modifica</p>
-                                                    <p onClick={() => handleDelete(asset.id)}>🗑️ Rimuovi</p>
+                                                    <p onClick={() => handleEdit(asset)}> Modifica</p>
+                                                    <p onClick={() => handleDelete(asset.id)}> Rimuovi</p>
                                                 </div>
                                             )}
                                         </div>
