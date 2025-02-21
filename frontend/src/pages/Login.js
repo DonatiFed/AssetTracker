@@ -10,7 +10,7 @@ function Login() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     useEffect(() => {
-        localStorage.clear();  // si eliminano tutti i dati salvati
+        localStorage.clear();
     }, []);
 
     const handleLogin = async (e) => {
@@ -31,9 +31,10 @@ function Login() {
 
             localStorage.setItem('user_role', userResponse.data.role); // salvo ruolo e id
             localStorage.setItem('user_id', userResponse.data.id);
-            console.log(localStorage);
 
-            navigate('/home');
+            navigate('/home', { replace: true });
+
+
         } catch (err) {
             setError('Credenziali non valide');
         }
