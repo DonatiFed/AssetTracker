@@ -22,6 +22,8 @@ function Login() {
             });
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
+            console.log('access_token:', response.data.access);
+            console.log('refresh_token:', response.data.refresh);
 
 
             const userResponse = await axios.get('http://localhost:8001/users/me/', {
@@ -31,9 +33,7 @@ function Login() {
 
             localStorage.setItem('user_role', userResponse.data.role); // salvo ruolo e id
             localStorage.setItem('user_id', userResponse.data.id);
-
-            navigate('/home', { replace: true });
-
+            navigate('/home');
 
         } catch (err) {
             setError('Credenziali non valide');

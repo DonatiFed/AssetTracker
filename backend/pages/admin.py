@@ -6,7 +6,7 @@ from django.db.models import Sum, Exists, OuterRef
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'email', 'role')  # Usa 'role' invece di 'is_manager'
+    list_display = ('username', 'first_name', 'last_name', 'email', 'role')
     list_filter = ('role',)
     search_fields = ('username', 'email', 'first_name', 'last_name')
     fieldsets = (
@@ -32,7 +32,6 @@ class AssetAdmin(admin.ModelAdmin):
     readonly_fields = ('available_quantity',)
 
     def available_quantity(self, obj):
-        """Calcola la quantità disponibile in base alle acquisizioni attive."""
         acquired_quantity = Acquisition.objects.filter(
             assignment__asset=obj,
             is_active=True
@@ -58,7 +57,6 @@ class AssignmentAdmin(admin.ModelAdmin):
     actions = ['mark_as_inactive']
 
     def mark_as_inactive(self, request, queryset):
-        """Segna gli assignments selezionati come inattivi (soft delete)."""
         queryset.update(is_active=False)
 
     mark_as_inactive.short_description = "Segna come inattivi"

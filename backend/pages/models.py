@@ -23,7 +23,7 @@ class Asset(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     total_quantity = models.PositiveIntegerField(default=1)
-    created_at = models.DateTimeField(default=now(), editable=False)
+    created_at = models.DateTimeField(default=now, editable=False)
 
     def available_quantity(self):
         assigned = sum(a.assigned_quantity for a in self.assignments.all())
