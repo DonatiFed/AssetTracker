@@ -1,6 +1,7 @@
 
 from pathlib import Path
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()  #importo variabili da file .env
@@ -45,7 +46,7 @@ LOGGING = {
 
 
 # SECURITY WARNING: non runnare con debug on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost']
 
@@ -99,17 +100,13 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+print("DATABASE_URL:", os.getenv("DATABASE_URL"))
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DATABASE_NAME'),
-        'USER': os.getenv('DATABASE_USER'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        'HOST': os.getenv('DATABASE_HOST'),
-        'PORT': os.getenv('DATABASE_PORT', '5432'),
-    }
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
+
+if not DATABASES['default']:
+    raise Exception("DATABASE_URL is not set correctly!")
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
