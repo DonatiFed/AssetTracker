@@ -11,11 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Ora copia tutto il codice del progetto
 COPY . .
 
-# Imposta le variabili d'ambiente per la produzione
-ENV PYTHONUNBUFFERED=1
 
-# Colleziona i file statici prima dell'avvio
-RUN python manage.py collectstatic --noinput
 
 # Espone la porta per Django
 EXPOSE 8000
