@@ -5,6 +5,8 @@ import "../style.css";
 
 function Navbar() {
     const [userRole, setUserRole] = useState(null);
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
+
 
     useEffect(() => {
         const fetchUserRole = async () => {
@@ -15,7 +17,7 @@ function Navbar() {
                     return;
                 }
 
-                const response = await axios.get("http://localhost:8001/users/me/", {
+                const response = await axios.get(`${API_URL}/users/me/`, {
                     headers: {Authorization: `Bearer ${token}`}
                 });
 

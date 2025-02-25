@@ -30,12 +30,13 @@ function Users() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
+                const API_URL = process.env.REACT_APP_BACKEND_URL;
                 const headers = {Authorization: `Bearer ${token}`};
 
                 const [usersRes, assignmentsRes, acquisitionsRes] = await Promise.all([
-                    axios.get("http://localhost:8001/api/users/", {headers}),
-                    axios.get("http://localhost:8001/api/assignments/", {headers}),
-                    axios.get("http://localhost:8001/api/acquisitions/", {headers})
+                    axios.get(`${API_URL}/users/`, {headers}),
+                    axios.get(`${API_URL}/assignments/`, {headers}),
+                    axios.get(`${API_URL}/acquisitions/`, {headers})
                 ]);
 
                 const updatedUsers = usersRes.data.map(user => ({
@@ -79,8 +80,9 @@ function Users() {
         if (!window.confirm("Sei sicuro di voler rimuovere questo utente?")) return;
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            await axios.delete(`http://localhost:8001/api/users/${id}/`, {headers});
+            await axios.delete(`${API_URL}/users/${id}/`, {headers});
             setUsers(users.filter(user => user.id !== id));
         } catch (error) {
             console.error("Errore durante la rimozione:", error);
@@ -90,8 +92,9 @@ function Users() {
     const handleAddUser = async (formData) => {
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            const response = await axios.post("http://localhost:8001/api/users/", formData, {headers});
+            const response = await axios.post(`${API_URL}/users/`, formData, {headers});
             setUsers([...users, response.data]);
             setShowAddModal(false);
         } catch (error) {
@@ -103,8 +106,9 @@ function Users() {
         if (!currentUser) return;
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            const response = await axios.put(`http://localhost:8001/api/users/${currentUser.id}/`, formData, {headers});
+            const response = await axios.put(`${API_URL}/users/${currentUser.id}/`, formData, {headers});
             setUsers(users.map(u => u.id === currentUser.id ? response.data : u));
             setShowEditModal(false);
         } catch (error) {

@@ -10,6 +10,7 @@ function Register() {
     const [error, setError] = useState(null);
     const [emailError, setEmailError] = useState(null);
     const navigate = useNavigate();
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,7 +29,7 @@ function Register() {
         };
 
         try {
-            const response = await axios.post("http://localhost:8001/api/register/", data, {
+            const response = await axios.post(`${API_URL}/register/`, data, {
                 headers: {"Content-Type": "application/json"},
             });
 

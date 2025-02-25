@@ -32,12 +32,13 @@ function AcquiredAssets() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
+                const API_URL = process.env.REACT_APP_BACKEND_URL;
                 const headers = {Authorization: `Bearer ${token}`};
 
                 const [acquisitionsRes, assignmentsRes, locationsRes] = await Promise.all([
-                    axios.get("http://localhost:8001/api/acquisitions/", {headers}),
-                    axios.get("http://localhost:8001/api/assignments/", {headers}),
-                    axios.get("http://localhost:8001/api/locations/", {headers})
+                    axios.get(`${API_URL}/acquisitions/`, {headers}),
+                    axios.get(`${API_URL}/assignments/`, {headers}),
+                    axios.get(`${API_URL}/locations/`, {headers})
                 ]);
 
                 setAcquiredAssets(acquisitionsRes.data);
@@ -67,7 +68,8 @@ function AcquiredAssets() {
     const handleRemoveAcquisition = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
-            await axios.patch(`http://localhost:8001/api/acquisitions/${id}/deactivate/`, {}, {
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
+            await axios.patch(`${API_URL}/acquisitions/${id}/deactivate/`, {}, {
                 headers: {Authorization: `Bearer ${token}`}
             });
             setAcquiredAssets(acquiredAssets.map(asset =>
@@ -90,8 +92,9 @@ function AcquiredAssets() {
 
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            const response = await axios.post("http://localhost:8001/api/acquisitions/", dataToSend, {headers});
+            const response = await axios.post(`${API_URL}/acquisitions/`, dataToSend, { headers });
 
             setAcquiredAssets((prevAssets) => [...prevAssets, response.data]);
             setShowAddModal(false);
@@ -110,6 +113,8 @@ function AcquiredAssets() {
     const handleSaveEdit = async (formData) => {
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
+
 
             if (!selectedAsset) {
                 setError("Errore: Nessuna acquisizione selezionata.");
@@ -119,7 +124,7 @@ function AcquiredAssets() {
             const requestData = {
                 quantity: Number(formData.quantity), // Assicuriamoci che sia un numero
             };
-            const response = await axios.put(`http://localhost:8001/api/acquisitions/${selectedAsset.id}/`, requestData, {
+            const response = await axios.put(`${API_URL}/acquisitions/${selectedAsset.id}/`, requestData, {
                 headers: {Authorization: `Bearer ${token}`}
             });
 

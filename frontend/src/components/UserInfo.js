@@ -5,6 +5,8 @@ import "../style.css"; // Assicurati che le nuove classi CSS siano incluse
 function UserInfo() {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
+
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -16,7 +18,7 @@ function UserInfo() {
                     return;
                 }
 
-                const response = await axios.get("http://localhost:8001/users/me/", {
+                const response = await axios.get(`${API_URL}/users/me/`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

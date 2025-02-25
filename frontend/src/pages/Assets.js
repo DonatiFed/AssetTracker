@@ -13,6 +13,7 @@ function Assets() {
     const [newAsset, setNewAsset] = useState({name: "", description: "", total_quantity: 0});
     const [role, setRole] = useState(null);
     const menuRefs = useRef({});
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
 
     useEffect(() => {
         const fetchUserRole = async () => {
@@ -26,15 +27,16 @@ function Assets() {
         const fetchAssets = async () => {
             try {
                 const token = localStorage.getItem("access_token");
+                const API_URL = process.env.REACT_APP_BACKEND_URL;
                 let response;
 
                 if (role === "manager") {
-                    response = await axios.get("http://localhost:8001/api/assets/", {
-                        headers: {Authorization: `Bearer ${token}`}
+                    response = await axios.get(`${API_URL}/assets/`, {
+                        headers: { Authorization: `Bearer ${token}` }
                     });
                 } else {
-                    response = await axios.get("http://localhost:8001/api/assets/user/", {
-                        headers: {Authorization: `Bearer ${token}`}
+                    response = await axios.get(`${API_URL}/assets/user/`, {
+                        headers: { Authorization: `Bearer ${token}` }
                     });
                 }
 
@@ -61,8 +63,9 @@ function Assets() {
     const handleSaveEdit = async () => {
         try {
             const token = localStorage.getItem("access_token");
-            await axios.put(`http://localhost:8001/api/assets/${editAsset.id}/`, editAsset, {
-                headers: {Authorization: `Bearer ${token}`}
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
+            await axios.put(`${API_URL}/assets/${editAsset.id}/`, editAsset, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             setAssets(assets.map(a => (a.id === editAsset.id ? editAsset : a)));
@@ -75,7 +78,8 @@ function Assets() {
     const handleDelete = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
-            await axios.delete(`http://localhost:8001/api/assets/${id}/`, {
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
+            await axios.delete(`${API_URL}/assets/${id}/`, {
                 headers: {Authorization: `Bearer ${token}`}
             });
 
@@ -88,7 +92,8 @@ function Assets() {
     const handleAddAsset = async () => {
         try {
             const token = localStorage.getItem("access_token");
-            const response = await axios.post("http://localhost:8001/api/assets/", newAsset, {
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
+            const response = await axios.post("${API_URL}/assets/", newAsset, {
                 headers: {Authorization: `Bearer ${token}`}
             });
             setAssets([...assets, response.data]);

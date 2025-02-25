@@ -27,14 +27,15 @@ function Reports() {
             try {
                 const token = localStorage.getItem("access_token");
                 const headers = {Authorization: `Bearer ${token}`};
+                const API_URL = process.env.REACT_APP_BACKEND_URL;
 
                 const requests = [
-                    axios.get("http://localhost:8001/api/acquisitions/", {headers}),
-                    axios.get("http://localhost:8001/api/reports/", {headers}),
-                    axios.get("http://localhost:8001/api/assignments/", {headers})
+                    axios.get(`${API_URL}/acquisitions/`, {headers}),
+                    axios.get(`${API_URL}/reports/`, {headers}),
+                    axios.get(`${API_URL}/assignments/`, {headers})
                 ];
                 if (userRole === 'manager') {
-                    requests.push(axios.get("http://localhost:8001/api/users/", {headers}));
+                    requests.push(axios.get(`${API_URL}/users/`, {headers}));
                 }
                 const [acqRes, reportRes, assignmentRes, userRes] = await Promise.all(requests);
 
@@ -104,8 +105,9 @@ function Reports() {
         const dataToSend = {acquisition: acquisition.id, title, description};
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            const response = await axios.post("http://localhost:8001/api/reports/", dataToSend, {headers});
+            const response = await axios.post(`${API_URL}/reports/`, dataToSend, {headers});
             setReports([...reports, response.data]);
             setShowAddModal(false);
         } catch (error) {
@@ -122,8 +124,9 @@ function Reports() {
 
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            const response = await axios.put(`http://localhost:8001/api/reports/${selectedReport.id}/`, dataToSend, {headers});
+            const response = await axios.put(`${API_URL}/reports/${selectedReport.id}/`, dataToSend, {headers});
             setReports(reports.map(r => (r.id === selectedReport.id ? response.data : r)));
             setShowEditModal(false);
         } catch (error) {
@@ -135,8 +138,9 @@ function Reports() {
     const handleRemoveReport = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            await axios.delete(`http://localhost:8001/api/reports/${id}/`, {headers});
+            await axios.delete(`${API_URL}/reports/${id}/`, {headers});
             setReports(reports.filter(report => report.id !== id));
         } catch (error) {
             console.error("Errore durante la rimozione del report:", error);

@@ -18,7 +18,9 @@ function Profile() {
         const fetchUserData = async () => {
             try {
                 const token = localStorage.getItem("access_token");
-                const response = await axios.get("http://localhost:8001/users/me/", {
+                const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+                const response = await axios.get(`${API_URL}/users/me/`, {
                     headers: {Authorization: `Bearer ${token}`},
                 });
                 const data = response.data;
@@ -49,7 +51,8 @@ function Profile() {
     const handleSave = async () => {
         try {
             const token = localStorage.getItem("access_token");
-            await axios.put(`http://localhost:8001/api/users/${userData.id}/`, editedData, {
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
+            await axios.put(`${API_URL}/users/${userData.id}/`, editedData, {
                 headers: {Authorization: `Bearer ${token}`},
             });
             setUserData(editedData);

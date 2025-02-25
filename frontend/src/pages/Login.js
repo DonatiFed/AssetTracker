@@ -12,11 +12,11 @@ function Login() {
     useEffect(() => {
         localStorage.clear();
     }, []);
-
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8001/api/token/', {
+            const response = await axios.post(`${API_URL}/token/`, {
                 username,
                 password
             });
@@ -26,7 +26,7 @@ function Login() {
             console.log('refresh_token:', response.data.refresh);
 
 
-            const userResponse = await axios.get('http://localhost:8001/users/me/', {
+            const userResponse = await axios.get(`${API_URL}/users/me/`, {
                 headers: {Authorization: `Bearer ${response.data.access}`}
             });
 

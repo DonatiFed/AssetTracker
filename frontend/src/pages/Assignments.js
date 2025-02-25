@@ -28,11 +28,13 @@ function Assignments() {
             try {
                 const token = localStorage.getItem("access_token");
                 const headers = {Authorization: `Bearer ${token}`};
+                const API_URL = process.env.REACT_APP_BACKEND_URL;
+
 
                 const [assignmentsRes, usersRes, assetsRes] = await Promise.all([
-                    axios.get("http://localhost:8001/api/assignments/", {headers}),
-                    axios.get("http://localhost:8001/api/users/", {headers}),
-                    axios.get("http://localhost:8001/api/assets/", {headers}),
+                    axios.get(`${API_URL}/assignments/`, {headers}),
+                    axios.get(`${API_URL}/users/`, {headers}),
+                    axios.get(`${API_URL}/assets/`, {headers}),
                 ]);
 
                 setAssignments(assignmentsRes.data);
@@ -56,6 +58,8 @@ function Assignments() {
             setIsLoading(true);
             const token = localStorage.getItem("access_token");
             const headers = {Authorization: `Bearer ${token}`};
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
+
 
             const existingAssignment = assignments.find(
                 (a) =>
@@ -75,7 +79,7 @@ function Assignments() {
             };
 
             const response = await axios.post(
-                "http://localhost:8001/api/assignments/",
+                `${API_URL}/assignments/`,
                 newAssignmentData,
                 {headers}
             );
@@ -96,9 +100,11 @@ function Assignments() {
         try {
             const token = localStorage.getItem("access_token");
             const headers = {Authorization: `Bearer ${token}`};
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
+
 
             const response = await axios.patch(
-                `http://localhost:8001/api/assignments/${id}/deactivate/`,
+                `${API_URL}/assignments/${id}/deactivate/`,
                 {},
                 {headers}
             );

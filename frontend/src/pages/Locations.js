@@ -20,10 +20,11 @@ function Locations() {
             try {
                 const token = localStorage.getItem("access_token");
                 const headers = {Authorization: `Bearer ${token}`};
+                const API_URL = process.env.REACT_APP_BACKEND_URL;
                 const userRole = localStorage.getItem("user_role");
                 setRole(userRole);
 
-                const response = await axios.get("http://localhost:8001/api/locations/", {headers});
+                const response = await axios.get(`${API_URL}/locations/`, {headers});
                 setLocations(response.data);
             } catch (error) {
                 console.error("Errore nel recupero delle locations:", error);
@@ -37,8 +38,9 @@ function Locations() {
     const handleAddLocation = async (data) => {
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            const response = await axios.post("http://localhost:8001/api/locations/", data, {headers});
+            const response = await axios.post(`${API_URL}/locations/`, data, {headers});
             setLocations([...locations, response.data]);
             setShowAddModal(false);
         } catch (error) {
@@ -54,8 +56,9 @@ function Locations() {
         };
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            const response = await axios.put(`http://localhost:8001/api/locations/${id}/`, formattedData, {headers});
+            const response = await axios.put(`${API_URL}/locations/${id}/`, formattedData, {headers});
             setLocations(locations.map(loc => (loc.id === id ? response.data : loc)));
             setShowEditModal(false);
         } catch (error) {
@@ -65,8 +68,9 @@ function Locations() {
     const handleRemoveLocation = async (id) => {
         try {
             const token = localStorage.getItem("access_token");
+            const API_URL = process.env.REACT_APP_BACKEND_URL;
             const headers = {Authorization: `Bearer ${token}`};
-            await axios.delete(`http://localhost:8001/api/locations/${id}/`, {headers});
+            await axios.delete(`${API_URL}/locations/${id}/`, {headers});
             setLocations(locations.filter(loc => loc.id !== id));
         } catch (error) {
             console.error("Errore durante la rimozione della location:", error);
