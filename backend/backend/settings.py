@@ -140,6 +140,11 @@ CORS_ALLOWED_ORIGINS = [
     "https://assettracker-frontend.onrender.com",
     "https://frontend.onrender.com",
 ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://assettracker-frontend.onrender.com",
+    "https://frontend.onrender.com",
+]
+
 
 CORS_ALLOW_CREDENTIALS = True  # Permetti l'uso di cookie/token
 
