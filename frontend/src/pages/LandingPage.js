@@ -5,6 +5,8 @@ import "../style.css";
 
 function LandingPage() {
     const navigate = useNavigate();
+    console.log("API URL in React:", process.env.REACT_APP_BACKEND_URL);
+
 
     return (
         <div className="login-container">

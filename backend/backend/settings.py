@@ -5,6 +5,8 @@ import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()  #importo variabili da file .env
+
+print("DEBUG: DATABASE_URL =", os.getenv("DATABASE_URL"))
 ERG1 = os.getenv("ERG1", "default_value")
 
 #per creare path nel progetto uso BASE_DIR / 'subdir'.
