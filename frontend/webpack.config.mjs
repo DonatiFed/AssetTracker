@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 export default {
     entry: './src/index.js',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'build'),
         filename: 'bundle.js',
         publicPath: '/',
     },
