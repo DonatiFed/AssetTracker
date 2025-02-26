@@ -16,24 +16,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-web:
-    build: .
-    container_name: asset_tracker_backend
-    restart: always
-    depends_on:
-      - db
-    environment:
-      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/${DATABASE_NAME}
-    env_file:
-      - .env
-    ports:
-      - "8001:8000"
-    volumes:
-      - .:/app
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-    
+  web:
+      build: .
+      container_name: asset_tracker_backend
+      restart: always
+      depends_on:
+        - db
+      environment:
+        DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/${DATABASE_NAME}
+      env_file:
+        - .env
+      ports:
+        - "8001:8000"
+      volumes:
+        - .:/app
+      entrypoint: ["/app/entrypoint.sh"]
+      command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 volumes:
   postgres_data:
