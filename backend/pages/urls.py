@@ -27,6 +27,6 @@ urlpatterns = [
     path("", home, name="home"),  # Pagina di test
     path("api/", include(router.urls)),  # ✅ Registra tutte le API del backend
     path("api/register/", RegisterView.as_view(), name="register"),
-    path("api/users/me/", get_current_user, name="get_current_user"),
+    path("users/me/", get_current_user, name="get_current_user"),
     path("health/", health_check),  # Health check per verificare il backend
 ]
