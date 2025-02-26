@@ -1,6 +1,6 @@
 # Usa un'immagine ufficiale Python
 FROM python:3.10
-RUN apt-get update && apt-get install -y postgresql-client
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
 # Imposta la directory di lavoro nel container
 WORKDIR /app
