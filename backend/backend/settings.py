@@ -139,11 +139,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://assettracker-frontend.onrender.com",
     "https://frontend.onrender.com",
+    "https://assettracker-frontend.onrender.com"  # Assicurati che sia incluso
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://assettracker-frontend.onrender.com",
     "https://frontend.onrender.com",
 ]
+CORS_ALLOW_ALL_ORIGINS = True  # Solo per debugging! NON in produzione.
 
 
 CORS_ALLOW_CREDENTIALS = True  # Permetti l'uso di cookie/token
@@ -173,10 +175,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'pages.CustomUser'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ),
 }
