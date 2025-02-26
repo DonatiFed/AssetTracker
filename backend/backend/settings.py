@@ -8,7 +8,7 @@ load_dotenv()  #importo variabili da file .env
 
 print("DEBUG: DATABASE_URL =", os.getenv("DATABASE_URL"))
 ERG1 = os.getenv("ERG1", "default_value")
-PORT = os.getenv("PORT", 8000)
+PORT = os.getenv("PORT", "8000")
 
 #per creare path nel progetto uso BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,7 +51,7 @@ LOGGING = {
 # SECURITY WARNING: non runnare con debug on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost', 'assettracker-xdb8.onrender.com']
+ALLOWED_HOSTS = ["backend.onrender.com", "127.0.0.1", "localhost"]
 
 #Application
 
@@ -144,6 +144,7 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://assettracker-frontend.onrender.com",
     "https://frontend.onrender.com",
+    "https://backend.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True  # Permetti l'uso di cookie/token
 CORS_ALLOW_METHODS = [
