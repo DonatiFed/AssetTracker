@@ -51,7 +51,7 @@ LOGGING = {
 # SECURITY WARNING: non runnare con debug on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["backend.onrender.com", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ['backend.onrender.com','0.0.0.0', '127.0.0.1', 'localhost', 'assettracker-xdb8.onrender.com']
 
 #Application
 

@@ -18,7 +18,8 @@ COPY . .
 EXPOSE 8000
 
 # Carica manualmente le variabili d'ambiente
-ENV DATABASE_URL=${DATABASE_URL}
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
 
 # Comando di avvio
-CMD ["sh", "-c", "echo DATABASE_URL: $DATABASE_URL && python manage.py migrate && gunicorn backend.wsgi:application --bind 0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn backend.wsgi:application --bind 0.0.0.0:8000"]
