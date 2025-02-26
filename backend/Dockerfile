@@ -20,4 +20,4 @@ EXPOSE 8000
 ENV DATABASE_URL=${DATABASE_URL}
 
 # Comando di avvio
-CMD ["sh", "-c", "echo DATABASE_URL: $DATABASE_URL && python manage.py migrate && psql \"$DATABASE_URL\""]
+CMD ["sh", "-c", "echo DATABASE_URL: $DATABASE_URL && python manage.py dbshell"]
