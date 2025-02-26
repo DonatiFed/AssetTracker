@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'pages.apps.PagesConfig',  #app personalizzata
     'rest_framework',  #Django rest framework
     'rest_framework_simplejwt', #autenticazione con jwt
