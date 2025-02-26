@@ -17,11 +17,9 @@ router.register(r'acquisitions', AcquisitionViewSet)  # User può acquisire/rila
 router.register(r'reports', ReportViewSet)  # User può scrivere report
 router.register(r'locations', LocationViewSet)  # Manager può aggiungere/modificare luoghi, user li vede
 
-def home(request):
-    return HttpResponse("Django è online su Render! 🚀")
+
 urlpatterns = [
-    path("", home, name="home"),  # ✅ AGGIUNGI LA ROOT
-    path("api/", include(router.urls)),  # ✅ API REST
-    path("api/register/", RegisterView.as_view(), name="register"),
+    path("", include(router.urls)),  # ✅ Registra tutte le API
+    path("register/", RegisterView.as_view(), name="register"),
     path("users/me/", get_current_user, name="get_current_user"),
 ]
