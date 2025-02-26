@@ -21,7 +21,7 @@ def home(request):
     return HttpResponse("Django è online su Render! 🚀")
 urlpatterns = [
     path("", home),
-    path('api/', include(router.urls)),
-    path('users/me/', get_current_user, name='get_current_user'),  # ✅ API per ottenere l'utente attual
-    path("api/register/", RegisterView.as_view(), name="register"),
+    path('', include(router.urls)),  # NON mettiamo 'api/' qui!
+    path('users/me/', get_current_user, name='get_current_user'),
+    path("register/", RegisterView.as_view(), name="register"),
 ]

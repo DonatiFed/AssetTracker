@@ -11,7 +11,7 @@ def health_check(request):
     return JsonResponse({"status": "ok"})
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('pages.urls')),  # Include tutte le API definite in pages/urls.py
+    path('api/', include('pages.urls')),  # Include tutte le API definite in pages/urls.py
     path('api-auth/', include('rest_framework.urls')),  # Per il login/logout di DRF
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

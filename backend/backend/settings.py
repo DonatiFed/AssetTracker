@@ -145,10 +145,22 @@ CSRF_TRUSTED_ORIGINS = [
     "https://assettracker-frontend.onrender.com",
     "https://frontend.onrender.com",
 ]
-CORS_ALLOW_ALL_ORIGINS = True  # Solo per debugging! NON in produzione.
-
-
 CORS_ALLOW_CREDENTIALS = True  # Permetti l'uso di cookie/token
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS"
+]
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+    "x-requested-with",
+    "Access-Control-Allow-Origin",
+    "Access-Control-Allow-Credentials"
+]
 
 
 # Internationalization
