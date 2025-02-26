@@ -64,7 +64,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'pages.apps.PagesConfig',  #app personalizzata
-    'pages',
     'rest_framework',  #Django rest framework
     'rest_framework_simplejwt', #autenticazione con jwt
     'rest_framework.authtoken',
