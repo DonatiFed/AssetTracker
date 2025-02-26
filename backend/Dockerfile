@@ -21,4 +21,4 @@ EXPOSE 8000
 ENV DATABASE_URL=${DATABASE_URL}
 
 # Comando di avvio
-CMD ["sh", "-c", "echo DATABASE_URL: $DATABASE_URL && python manage.py migrate && python manage.py dbshell"]
+CMD ["sh", "-c", "echo DATABASE_URL: $DATABASE_URL && python manage.py migrate && gunicorn backend.wsgi:application --bind 0.0.0.0:8000"]
