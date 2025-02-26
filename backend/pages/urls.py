@@ -4,6 +4,7 @@ from .views import (
     CustomUserViewSet, AssetViewSet, AssignmentViewSet, AcquisitionViewSet,
     ReportViewSet, LocationViewSet, get_current_user, RegisterView
 )
+from django.http import JsonResponse, HttpResponse
 
 router = DefaultRouter()
 
