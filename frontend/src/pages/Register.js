@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import "../style.css";
@@ -11,6 +11,7 @@ function Register() {
     const [emailError, setEmailError] = useState(null);
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_BACKEND_URL;
+    console.log(API_URL);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
