@@ -103,9 +103,13 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 print("DATABASE_URL:", os.getenv("DATABASE_URL"))
+
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
+
+# Forza il search_path dopo la configurazione
+DATABASES['default']['OPTIONS'] = {'options': '-c search_path=public'}
 
 if not DATABASES['default']:
     raise Exception("DATABASE_URL is not set correctly!")
