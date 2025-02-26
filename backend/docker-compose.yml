@@ -16,17 +16,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  web:
+web:
     build: .
     container_name: asset_tracker_backend
     restart: always
     depends_on:
       - db
     environment:
-      DATABASE_HOST: db
-      DATABASE_NAME: ${DATABASE_NAME}
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/${DATABASE_NAME}
     env_file:
       - .env
     ports:
