@@ -11,7 +11,6 @@ function Register() {
     const [emailError, setEmailError] = useState(null);
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_BACKEND_URL;
-    console.log(API_URL);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

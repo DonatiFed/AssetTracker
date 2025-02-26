@@ -129,6 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Permettiamo richieste da localhost:3000 (React)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://assettracker-frontend.onrender.com",
 ]
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
