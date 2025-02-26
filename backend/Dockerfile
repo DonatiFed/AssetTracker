@@ -1,5 +1,6 @@
 # Usa un'immagine ufficiale Python
 FROM python:3.10
+RUN apt-get update && apt-get install -y postgresql-client
 
 # Imposta la directory di lavoro nel container
 WORKDIR /app
@@ -20,4 +21,4 @@ EXPOSE 8000
 ENV DATABASE_URL=${DATABASE_URL}
 
 # Comando di avvio
-CMD ["sh", "-c", "echo DATABASE_URL: $DATABASE_URL && python manage.py dbshell"]
+CMD ["sh", "-c", "echo DATABASE_URL: $DATABASE_URL && python manage.py migrate && python manage.py dbshell"]
