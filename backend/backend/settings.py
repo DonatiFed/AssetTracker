@@ -136,7 +136,10 @@ AUTH_PASSWORD_VALIDATORS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://assettracker-frontend.onrender.com",
+    "https://frontend.onrender.com",
 ]
+
+CORS_ALLOW_CREDENTIALS = True  # Permetti l'uso di cookie/token
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
