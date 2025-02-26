@@ -15,8 +15,17 @@ router.register(r'acquisitions', AcquisitionViewSet)  # Utente acquisisce/rilasc
 router.register(r'reports', ReportViewSet)  # Utente scrive report
 router.register(r'locations', LocationViewSet)  # Manager modifica luoghi, utenti li vedono
 
+def home(request):
+    return HttpResponse("Django è online su Render? 🚀")
+def health_check(request):
+    return JsonResponse({"status": "ok"})
+
+
+
 urlpatterns = [
+    path("", home, name="home"),  # Pagina di test
     path("api/", include(router.urls)),  # ✅ Registra tutte le API del backend
     path("api/register/", RegisterView.as_view(), name="register"),
     path("api/users/me/", get_current_user, name="get_current_user"),
+    path("health/", health_check),  # Health check per verificare il backend
 ]
