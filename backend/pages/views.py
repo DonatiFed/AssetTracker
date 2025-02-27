@@ -23,22 +23,18 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'list':  # GET /users/
-            permission_classes = [IsAuthenticated,
-                                  IsManager]  # solo i manager possono vedere tutti gli utenti,mentre gli user possono vedere solo il proprio profilo
+            permission_classes = [IsAuthenticated, IsManager]
         elif self.action == 'retrieve':  # GET /users/<id>/
             permission_classes = [IsAuthenticated, IsOwnerOrManager]
         else:  # PUT, PATCH, DELETE
             permission_classes = [IsAuthenticated, IsOwnerOrManager]
-
         return [permission() for permission in permission_classes]
 
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def get_current_user(request):
-    user = request.user
-    serializer = CustomUserSerializer(user)
-    return Response(serializer.data)
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        """Restituisce il profilo dell'utente autenticato"""
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
 
 User = get_user_model()
