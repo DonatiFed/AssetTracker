@@ -4,6 +4,7 @@ import os
 import dj_database_url
 from dotenv import load_dotenv
 
+
 load_dotenv()  #importo variabili da file .env
 
 print("DEBUG: DATABASE_URL =", os.getenv("DATABASE_URL"))
@@ -180,6 +181,9 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+# Assicurati che Django trovi i file statici
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
