@@ -17,7 +17,8 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # Gestisci tutte le richieste sconosciute e rimanda a React
-    re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")),
+    re_path(r'^(?!api/|admin/|health/).*$', TemplateView.as_view(template_name="index.html")),
+
 
 ]
 
