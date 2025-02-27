@@ -485,4 +485,44 @@ body {
     color: white;
 }
 
+/* Schermi piccoli (telefono) */
+@media (max-width: 600px) {
+    .login-container, .profile-card {
+        width: 90%; /* Riduci la larghezza */
+        padding: 20px;
+    }
+
+    .navbar {
+        padding: 10px;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+
+    .styled-table {
+        font-size: 14px;
+    }
+
+    .table-container {
+        width: 100%;
+        overflow-x: auto; /* Abilita lo scroll orizzontale se necessario */
+    }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .login-container, .profile-card {
+        max-width: 350px;
+    }
+
+    .styled-table {
+        font-size: 15px;
+    }
+}
 
