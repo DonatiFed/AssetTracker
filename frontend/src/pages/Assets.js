@@ -93,7 +93,7 @@ function Assets() {
         try {
             const token = localStorage.getItem("access_token");
             const API_URL = process.env.REACT_APP_BACKEND_URL;
-            const response = await axios.post("${API_URL}/assets/", newAsset, {
+            const response = await axios.post(`${API_URL}/assets/`, newAsset, {
                 headers: {Authorization: `Bearer ${token}`}
             });
             setAssets([...assets, response.data]);
