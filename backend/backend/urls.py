@@ -16,8 +16,8 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),  # Per il login/logout di DRF
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    re_path(r"^.*$", TemplateView.as_view(template_name="index.html"), name="home"),
+    # Gestisci tutte le richieste sconosciute e rimanda a React
+    re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")),
 
 ]
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
