@@ -3,7 +3,8 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
-
+from datetime import timedelta
+import logging
 
 load_dotenv()  #importo variabili da file .env
 
@@ -15,7 +16,7 @@ PORT = os.getenv("PORT", "8000")
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-import logging
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -71,10 +72,20 @@ INSTALLED_APPS = [
     'corsheaders',  #per autorizzare host della reactapp ad accedere(gestire richieste CORS)
 
 ]
+
+class LogMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        logging.warning(f"Richiesta ricevuta: {request.method} {request.path} - Dati: {getattr(request, 'body', '')}")
+        return self.get_response(request)
 #gestire flusso richieste http
 MIDDLEWARE = [
+    'backend.settings.LogMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -140,12 +151,14 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://assettracker-frontend.onrender.com",
     "https://frontend.onrender.com",
-    "https://assettracker-frontend.onrender.com"  # Assicurati che sia incluso
+    "https://assettracker-frontend.onrender.com",  # Assicurati che sia incluso
+    "https://assettracker-xdb8.onrender.com"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://assettracker-frontend.onrender.com",
     "https://frontend.onrender.com",
     "https://backend.onrender.com",
+    "https://assettracker-xdb8.onrender.com"
 ]
 CORS_ALLOW_CREDENTIALS = True  # Permetti l'uso di cookie/token
 CORS_ALLOW_METHODS = [
@@ -182,6 +195,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # Assicurati che Django trovi i file statici
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 
@@ -199,4 +216,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+}
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),  # Cambia questo valore se necessario
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
