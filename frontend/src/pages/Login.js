@@ -24,8 +24,6 @@ function Login() {
             localStorage.setItem('refresh_token', response.data.refresh);
             console.log('access_token:', response.data.access);
             console.log('refresh_token:', response.data.refresh);
-
-
             const userResponse = await axios.get(`${API_URL}/users/me/`, {
                 headers: {Authorization: `Bearer ${response.data.access}`}
             });
