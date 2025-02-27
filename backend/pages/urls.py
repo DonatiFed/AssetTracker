@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     CustomUserViewSet, AssetViewSet, AssignmentViewSet, AcquisitionViewSet,
-    ReportViewSet, LocationViewSet, get_current_user, RegisterView
+    ReportViewSet, LocationViewSet, RegisterView
 )
 from django.http import JsonResponse, HttpResponse
 
