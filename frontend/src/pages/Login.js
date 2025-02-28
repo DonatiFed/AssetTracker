@@ -4,8 +4,7 @@ import axios from 'axios';
 import '../style.css';
 
 
-
-function Login({ onLogin }) {
+function Login({onLogin}) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -33,7 +32,7 @@ function Login({ onLogin }) {
             localStorage.setItem('user_role', userResponse.data.role); // salvo ruolo e id
             localStorage.setItem('user_id', userResponse.data.id);
             onLogin();
-            navigate('/home', { replace: true });
+            navigate('/home', {replace: true});
 
         } catch (err) {
             setError('Credenziali non valide');
