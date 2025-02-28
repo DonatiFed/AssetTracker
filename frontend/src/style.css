@@ -487,31 +487,34 @@ body {
 
 /* Schermi piccoli (telefono) */
 @media (max-width: 600px) {
+    /* Contenitore della tabella */
     .table-container {
         width: 100%;
-        overflow-x: auto;
-        max-height: none; /* Rimuove il limite di altezza */
+        overflow-x: auto; /* Scroll orizzontale */
     }
 
+    /* Tabella */
     .styled-table {
         display: block;
-        width: max-content; /* Evita la compressione della tabella */
+        width: max-content; /* Evita compressione */
         min-width: 100%;
-        overflow-x: auto;
-        white-space: nowrap; /* Evita la rottura del testo */
+        white-space: nowrap; /* Evita testo a capo */
+        font-size: 12px; /* Testo più piccolo */
     }
 
     .styled-table th,
     .styled-table td {
-        padding: 8px; /* Riduci il padding */
-        font-size: 12px; /* Testo più piccolo */
+        padding: 6px; /* Riduce il padding per evitare colonne troppo larghe */
     }
 
+    /* Ottimizzazione del layout */
     .login-container, .profile-card {
-        width: 90%; /* Riduci la larghezza */
+        width: 90%;
+        max-width: 400px;
         padding: 20px;
     }
 
+    /* Navbar */
     .navbar {
         padding: 10px;
     }
@@ -525,13 +528,13 @@ body {
         margin: 10px 0;
     }
 
-    .styled-table {
-        font-size: 14px;
-    }
-
-    .table-container {
-        width: 100%;
-        overflow-x: auto; /* Abilita lo scroll orizzontale se necessario */
+    /* Sidebar */
+    .sidebar {
+        height: 100vh; /* Occupa tutta l'altezza */
+        overflow-y: auto; /* Scroll verticale */
+        position: fixed;
+        width: 250px; /* Assicurati che non si restringa troppo */
+        z-index: 1000; /* Mantiene la sidebar sopra gli altri elementi */
     }
 }
 
@@ -542,7 +545,6 @@ body {
     }
 
     .styled-table {
-        font-size: 15px;
+        font-size: 14px;
     }
 }
-
