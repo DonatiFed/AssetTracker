@@ -14,6 +14,7 @@ PORT = os.getenv("PORT", "8000")
 
 #per creare path nel progetto uso BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend', 'build', 'static'))
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 
@@ -195,9 +196,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # Assicurati che Django trovi i file statici
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "../frontend/build/static"),
-]
+if os.path.exists(FRONTEND_DIR):
+    STATICFILES_DIRS = [FRONTEND_DIR]
+else:
+    STATICFILES_DIRS = []
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 

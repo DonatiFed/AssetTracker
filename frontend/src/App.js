@@ -34,11 +34,9 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<LandingPage/>}/>
-                <Route path="/login" element={<Login onLogin={() => {
-                    setIsLoggedIn(true);
-                }}/>}/>
-                <Route path="/register" element={<Register/>}/>
+                <Route path="/" element={isLoggedIn ? <Navigate to="/home" /> : <LandingPage />} />
+                <Route path="/login" element={isLoggedIn ? <Navigate to="/home" /> : <Login onLogin={() => setIsLoggedIn(true)} />} />
+                <Route path="/register" element={isLoggedIn ? <Navigate to="/home" /> : <Register />} />
                 <Route path="/home" element={isLoggedIn ? <Home/> : <Navigate to="/"/>}/>
                 <Route path="/assets" element={isLoggedIn ? <Assets/> : <Navigate to="/"/>}/>
                 <Route path="/acquired-assets" element={isLoggedIn ? <AcquiredAssets/> : <Navigate to="/"/>}/>

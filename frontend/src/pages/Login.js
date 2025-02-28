@@ -1,10 +1,14 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import '../style.css';
 import {useEffect} from 'react';
 
-function Login() {
+useEffect(() => {
+    localStorage.clear();
+}, []);
+
+function Login({ onLogin }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -28,7 +32,8 @@ function Login() {
 
             localStorage.setItem('user_role', userResponse.data.role); // salvo ruolo e id
             localStorage.setItem('user_id', userResponse.data.id);
-            navigate('/home');
+            onLogin();
+            navigate('/home', { replace: true });
 
         } catch (err) {
             setError('Credenziali non valide');
