@@ -3,15 +3,16 @@ import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import '../style.css';
 
-useEffect(() => {
-    localStorage.clear();
-}, []);
+
 
 function Login({ onLogin }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    useEffect(() => {
+        localStorage.clear();
+    }, []);
     const API_URL = process.env.REACT_APP_BACKEND_URL;
     const handleLogin = async (e) => {
         e.preventDefault();
