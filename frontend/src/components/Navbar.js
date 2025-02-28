@@ -61,7 +61,7 @@ function Navbar() {
                     <li> Caricamento...</li> // Mostra "Caricamento" se ancora non ha caricato
                 )}
 
-                <li><Link to="/"> Logout</Link></li>
+                <Link to="/" onClick={() => localStorage.clear()}> Logout</Link>
             </ul>
         </nav>
     );

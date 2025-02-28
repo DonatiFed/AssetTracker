@@ -38,8 +38,7 @@ function Register() {
                 localStorage.setItem("refresh_token", response.data.refresh);
                 localStorage.setItem("user_id", response.data.id);
                 localStorage.setItem("role", response.data.role);
-
-                navigate("/home");
+                navigate("/");
             }
         } catch (err) {
             console.error("Errore durante la registrazione:", err.response?.data || err.message);
