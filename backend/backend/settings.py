@@ -196,7 +196,7 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # Assicurati che Django trovi i file statici
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "frontend", "build", "static"),
+    os.path.join(BASE_DIR, "../frontend/build/static"),
 ]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
