@@ -11,12 +11,12 @@ export default {
     entry: './src/index.js',
     output: {
         path: path.resolve(__dirname, 'build'),
-        filename: 'bundle.js',
+        filename: 'static/js/bundle.[contenthash].js',
         publicPath: '/',
     },
-    mode: 'development',
+    mode: 'production',
     devServer: {
-        static: path.join(__dirname, 'dist'),
+        static: path.join(__dirname, 'build'),
         port: 3000,
         historyApiFallback: true,
         hot: true,
@@ -41,6 +41,13 @@ export default {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader']
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg)$/i,  // ✅ Aggiungi supporto per immagini e font
+                type: 'asset/resource',
+                generator: {
+                    filename: 'static/media/[hash][ext][query]',  // ✅ Salva in build/static/media/
+                },
             }
         ]
     },
@@ -50,7 +57,8 @@ export default {
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            template: './public/index.html'
+            template: './public/index.html',
+            filename: 'index.html',
         }),
         new Dotenv()
     ]
