@@ -60,8 +60,12 @@ function Navbar() {
                 ) : (
                     <li> Caricamento...</li> // Mostra "Caricamento" se ancora non ha caricato
                 )}
-
-                <li><Link to="/" onClick={() => localStorage.clear()}> Logout</Link></li>
+                <li>
+                    <Link to="/" onClick={() => {
+                        localStorage.clear();
+                        window.location.href = "/";  // Forza il reload della pagina per aggiornare lo stato
+                    }}> Logout</Link>
+                </li>
             </ul>
         </nav>
     );
