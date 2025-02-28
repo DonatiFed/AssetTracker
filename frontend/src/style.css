@@ -485,77 +485,86 @@ body {
     color: white;
 }
 
-/* Schermi piccoli (telefono) */
+/* Migliore adattamento per dispositivi mobili */
 @media (max-width: 600px) {
-    /* Contenitore della tabella */
-    .table-container {
-        width: 100%;
-        overflow-x: auto; /* Scroll orizzontale */
+    /* Layout generale */
+    body {
+        overflow-x: hidden; /* Evita lo scroll laterale */
+        min-height: 100vh;
+        display: block; /* Evita che il flex nasconda contenuti */
+    }
+
+    /* Contenitore principale */
+    .table-container,
+    .login-container,
+    .profile-card,
+    .modal-container {
+        width: 95%;
+        max-width: none;
+        padding: 15px;
+        margin: 10px auto;
     }
 
     /* Tabella */
+    .table-container {
+        overflow-x: auto; /* Scroll orizzontale se necessario */
+        max-height: none;
+    }
+
     .styled-table {
         display: block;
-        width: max-content; /* Evita compressione */
-        min-width: 100%;
-        white-space: nowrap; /* Evita testo a capo */
-        font-size: 12px; /* Testo più piccolo */
+        width: 100%;
+        min-width: 600px; /* Evita che le colonne si comprimano troppo */
+        white-space: nowrap;
     }
 
-    .styled-table th,
-    .styled-table td {
-        padding: 6px; /* Riduce il padding per evitare colonne troppo larghe */
-    }
-
-    /* Ottimizzazione del layout */
-    .login-container, .profile-card, .modal-container {
-        width: 90%;
-        max-width: 400px;
-        padding: 20px;
-    }
-
-    /* Navbar */
+    /* Navbar più compatta */
     .navbar {
         padding: 10px;
-    }
-
-    .navbar ul {
+        display: flex;
         flex-direction: column;
         align-items: center;
     }
 
+    .navbar ul {
+        flex-direction: column;
+        padding: 0;
+    }
+
     .navbar li {
-        margin: 10px 0;
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
     }
 
-    /* Sidebar */
-    .sidebar {
-        height: 100vh; /* Occupa tutta l'altezza */
-        overflow-y: auto; /* Scroll verticale */
-        position: fixed;
-        width: 250px; /* Assicurati che non si restringa troppo */
-        z-index: 1000; /* Mantiene la sidebar sopra gli altri elementi */
+    /* Miglior gestione del modale */
+    .modal-container {
+        width: 90%;
+        max-width: 350px;
+        height: auto;
+        overflow-y: auto; /* Scroll interno se serve */
     }
 
-    /* Bottoni e input */
+    /* Migliore gestione pulsanti e input */
     .login-box input,
     .modal-container input {
-        font-size: 14px;
-        padding: 8px;
+        font-size: 16px;
+        padding: 10px;
     }
 
     .login-box button,
     .save-btn,
     .cancel-btn {
-        font-size: 14px;
-        padding: 10px;
+        font-size: 16px;
+        padding: 12px;
     }
 }
 
 /* Tablet */
 @media (max-width: 1024px) {
     .login-container, .profile-card {
-        max-width: 350px;
+        max-width: 400px;
     }
 
     .styled-table {
