@@ -13,6 +13,7 @@ export default {
         path: path.resolve(__dirname, 'build'),
         filename: 'static/js/bundle.[contenthash].js',
         publicPath: '/',
+        assetModuleFilename: 'static/media/[hash][ext][query]',
     },
     mode: 'production',
     devServer: {
