@@ -508,7 +508,7 @@ body {
     }
 
     /* Ottimizzazione del layout */
-    .login-container, .profile-card {
+    .login-container, .profile-card, .modal-container {
         width: 90%;
         max-width: 400px;
         padding: 20px;
@@ -535,6 +535,20 @@ body {
         position: fixed;
         width: 250px; /* Assicurati che non si restringa troppo */
         z-index: 1000; /* Mantiene la sidebar sopra gli altri elementi */
+    }
+
+    /* Bottoni e input */
+    .login-box input,
+    .modal-container input {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .login-box button,
+    .save-btn,
+    .cancel-btn {
+        font-size: 14px;
+        padding: 10px;
     }
 }
 
