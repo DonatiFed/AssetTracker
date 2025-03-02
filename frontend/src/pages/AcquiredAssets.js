@@ -154,7 +154,7 @@ function AcquiredAssets() {
                             </label>
                             <button className="sort-button" onClick={toggleSortOrder}>
                                 {sortOrder === "asc" ? <FaSortAmountDown/> : <FaSortAmountUp/>}
-                                {sortOrder === "asc" ? " Ordina Crescente" : " Ordina Decrescente"}
+                                {sortOrder === "asc" ? "Data Acquisizione Crescente" : "Data Acquisizione Decrescente"}
                             </button>
                             <button className="add-button" onClick={() => setShowAddModal(true)}>➕ Acquire New Asset
                             </button>

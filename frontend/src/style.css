@@ -478,6 +478,7 @@ body {
     cursor: pointer;
     transition: all 0.3s;
     font-weight: bold;
+    margin-right: 10px;
 }
 
 .sort-button:hover {
