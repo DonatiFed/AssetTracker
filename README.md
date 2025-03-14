@@ -79,24 +79,30 @@ Each role has a **dedicated interface** with different features for an optimized
    cd AssetTracker/backend
 
 2. Create and activate a virtual environment:
+   ```bash
    python -m venv venv  
    source venv/bin/activate  # On Windows use `venv\Scripts\activate
    
-3. Install dependencies:
+4. Install dependencies:
+   ```bash
    pip install -r requirements.txt
 
-4. Apply migrations and start the server:
-  python manage.py migrate  
-  python manage.py runserver 
+5. Apply migrations and start the server:
+   ```bash
+   python manage.py migrate  
+   python manage.py runserver 
 
 ### **Frontend Setup**  
 1. Navigate to the frontend repository:
+   ```bash
    cd ../frontend
 
-2. Install dependencies:
+3. Install dependencies:
+   ```bash
    npm install
 
-3. Start the React development server:
+5. Start the React development server:
+   ```bash
    npm start  
 
 
