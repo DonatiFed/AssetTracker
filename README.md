@@ -33,7 +33,7 @@ A web-based asset tracking application built with Django, React, and Docker.
 - **Modern and responsive UI**
    
 ---
-## 🔑 User Roles & Permissions  
+##  User Roles & Permissions  
 
 | Role    | Main Permissions |
 |---------|-----------------|
