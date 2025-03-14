@@ -1,15 +1,15 @@
-# 🚀 AssetTracker  
+# AssetTracker  
 
 A web-based asset tracking application built with Django, React, and Docker.  
 
-## 📌 Table of Contents  
+##  Table of Contents  
 - [Overview](#overview)  
-- [Features](#features)
+- [Features](#features)  
 - [User Roles & Permissions](#user-roles--permissions)  
-- [Tech Stack](#tech-stack)
-- [Deployment](#deployment)
+- [Tech Stack](#tech-stack)  
+- [Deployment](#deployment)  
 - [Live Demo](#live-demo)    
-- [Installation & Setup](#installation-and-setup) 
+- [Installation & Setup](#installation--setup) 
  
 
 ---
@@ -23,14 +23,15 @@ A web-based asset tracking application built with Django, React, and Docker.
 
 ---
 
-##  Features  
- **Login & Registration** with secure authentication  
- **Two user roles:** Manager and User  
- **Asset management** (create, edit, delete)  
- **Custom dashboard** based on user role  
- **Advanced search & filtering**  
- **Public REST API for integrations**  
- **Modern and responsive UI**  
+## Features  
+- **Login & Registration** with secure authentication  
+- **Two user roles:** Manager and User  
+- **Asset management** (create, edit, delete)  
+- **Custom dashboard** based on user role  
+- **Advanced search & filtering**  
+- **Public REST API for integrations**  
+- **Modern and responsive UI**
+   
 ---
 ## 🔑 User Roles & Permissions  
 
@@ -54,24 +55,24 @@ Each role has a **dedicated interface** with different features for an optimized
 - React.js  
 - CSS  
 
-### **Deployment**  
+## **Deployment**  
 - Render *(for hosting the backend & frontend)*  
 
 ---
 
-###  Live Demo  
+##  Live Demo  
   [Live Demo URL](#) *https://assettracker-frontend.onrender.com/*  
 
 ---
 
-### Installation & Setup  
+## Installation & Setup  
 
-## **Prerequisites**  
+### **Prerequisites**  
 - Python 3.x  
 - Node.js & npm  
 - Docker *(optional: if running in a containerized environment)*  
 
-## **Backend Setup**  
+### **Backend Setup**  
 1. Clone the repository:  
    ```bash
    git clone https://github.com/yourusername/AssetTracker.git
@@ -88,7 +89,7 @@ Each role has a **dedicated interface** with different features for an optimized
   python manage.py migrate  
   python manage.py runserver 
 
-## **Frontend Setup**  
+### **Frontend Setup**  
 1. Navigate to the frontend repository:
    cd ../frontend
 
